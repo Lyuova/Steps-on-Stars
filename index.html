@@ -3,53 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Навигатор по Степям</title>
+    <title>Навигатор по Степям 2.0</title>
     <style>
-        /* --- ТЕМНАЯ ХОЛОДНАЯ ТЕМА --- */
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            max-width: 600px;
+            max-width: 650px;
             margin: 2rem auto;
             padding: 0 1rem;
-            background-color: #0f172a; /* Очень темный синий фон */
-            color: #e2e8f0; /* Светлый холодный текст */
+            background-color: #0f172a;
+            color: #e2e8f0;
         }
 
-        h1 {
-            color: #38bdf8; /* Голубой заголовок */
-            text-align: center;
-            margin-bottom: 0.5rem;
-        }
-
-        p {
-            text-align: center;
-            color: #94a3b8;
-            margin-top: 0;
-        }
+        h1 { color: #38bdf8; text-align: center; margin-bottom: 0.5rem; }
+        p { text-align: center; color: #94a3b8; margin-top: 0; margin-bottom: 1.5rem; }
 
         .card {
-            background-color: #1e293b; /* Темно-синий блок */
+            background-color: #1e293b;
             padding: 2rem;
             border-radius: 12px;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
             border: 1px solid #334155;
         }
 
-        label {
-            display: block;
-            margin-top: 1rem;
-            font-size: 0.9rem;
-            color: #cbd5e1;
-        }
-
-        .input-group {
-            position: relative;
-        }
-
+        .input-group { margin-bottom: 1rem; position: relative; }
+        label { display: block; margin-bottom: 0.4rem; font-size: 0.9rem; color: #cbd5e1; }
+        
         input {
             width: 100%;
             padding: 0.8rem;
-            margin-top: 0.5rem;
             box-sizing: border-box;
             background-color: #0f172a;
             border: 1px solid #475569;
@@ -59,44 +40,56 @@
             outline: none;
             transition: border-color 0.3s;
         }
+        input:focus { border-color: #38bdf8; }
 
-        input:focus {
-            border-color: #38bdf8; /* Подсветка при вводе */
+        /* Контейнер для точек маршрута */
+        #waypointsContainer {
+            margin: 1rem 0;
+            padding-left: 1rem;
+            border-left: 2px dashed #475569;
         }
 
-        /* Кнопка "Поменять местами" */
-        .swap-container {
+        .waypoint-row {
             display: flex;
-            justify-content: center;
-            margin: 10px 0;
+            gap: 10px;
+            margin-bottom: 10px;
+            animation: fadeIn 0.3s;
         }
 
-        .swap-btn {
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .remove-btn {
+            background: #ef4444;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            width: 40px;
+            font-size: 1.2rem;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 1.5rem;
+        }
+
+        .secondary-btn {
             background: #334155;
             color: #38bdf8;
             border: 1px solid #475569;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
+            padding: 0.6rem 1rem;
+            border-radius: 6px;
             cursor: pointer;
-            font-size: 1.2rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s;
+            flex: 1;
+            transition: 0.2s;
         }
+        .secondary-btn:hover { background: #475569; }
 
-        .swap-btn:hover {
-            background: #475569;
-            transform: rotate(180deg);
-        }
-
-        /* Основная кнопка */
         .main-btn {
-            margin-top: 1.5rem;
             width: 100%;
             padding: 1rem;
-            background: linear-gradient(135deg, #0ea5e9 0%, #2563eb 100%); /* Градиент синего */
+            background: linear-gradient(135deg, #0ea5e9 0%, #2563eb 100%);
             color: white;
             border: none;
             border-radius: 6px;
@@ -106,199 +99,285 @@
             transition: opacity 0.2s;
             box-shadow: 0 4px 10px rgba(14, 165, 233, 0.3);
         }
+        .main-btn:hover { opacity: 0.9; }
 
-        .main-btn:hover {
-            opacity: 0.9;
-        }
-
-        /* Блок результата */
         #result {
             margin-top: 1.5rem;
             padding: 1rem;
             background-color: #0f172a;
             border-radius: 6px;
-            min-height: 50px;
             border: 1px dashed #334155;
-            white-space: pre-wrap;
-            position: relative;
+            min-height: 50px;
         }
 
-        .error { color: #f87171; } /* Красный */
-        .success { color: #4ade80; font-weight: bold; } /* Зеленый */
-        .path-text { color: #e2e8f0; margin-top: 10px; display: block; line-height: 1.6; }
-
-        /* Кнопка копирования */
-        .copy-btn {
-            display: none; /* Скрыта по умолчанию */
-            margin-top: 10px;
-            width: 100%;
-            padding: 0.6rem;
-            background-color: #334155;
-            color: #cbd5e1;
-            border: 1px solid #475569;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 0.9rem;
-            transition: background 0.2s;
-        }
-
-        .copy-btn:hover {
-            background-color: #475569;
-            color: white;
-        }
+        .path-block { margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid #334155; }
+        .path-block:last-child { border-bottom: none; }
+        .path-title { color: #4ade80; font-weight: bold; display: block; margin-bottom: 5px; }
+        .alt-title { color: #facc15; font-weight: bold; display: block; margin-bottom: 5px; font-size: 0.9rem; }
+        .path-text { line-height: 1.6; word-break: break-word; }
+        .error { color: #f87171; }
+        .info { color: #94a3b8; font-size: 0.9rem; font-style: italic; }
 
     </style>
 </head>
 <body>
 
 <div class="card">
-    <h1>🧭 Навигатор</h1>
-    <p>Введите номера степей от 1 до 100.</p>
+    <h1>🏔️ Умный Навигатор</h1>
+    <p>Поиск пути с учетом заезда в нужные степи</p>
 
     <div class="input-group">
-        <label for="startNode">Откуда (начальная степь):</label>
+        <label>🏁 Старт (Откуда):</label>
         <input type="text" id="startNode" placeholder="Например: 1">
     </div>
 
-    <div class="swap-container">
-        <button class="swap-btn" onclick="swapInputs()" title="Поменять местами">⇅</button>
+    <div id="waypointsContainer"></div>
+
+    <div class="action-buttons">
+        <button class="secondary-btn" onclick="addWaypoint()">+ Заехать через...</button>
+        <button class="secondary-btn" onclick="swapInputs()">⇅ Поменять старт/финиш</button>
     </div>
 
     <div class="input-group">
-        <label for="endNode">Куда (конечная степь):</label>
+        <label>🏁 Финиш (Куда):</label>
         <input type="text" id="endNode" placeholder="Например: 55">
     </div>
 
-    <button class="main-btn" onclick="findShortestPath()">Найти маршрут</button>
+    <button class="main-btn" onclick="calculateRoute()">Построить лучший маршрут</button>
 
-    <div id="result">Здесь появится маршрут...</div>
-    <button id="copyBtn" class="copy-btn" onclick="copyRoute()">📋 Копировать маршрут</button>
+    <div id="result">Результат отобразится здесь...</div>
 </div>
 
 <script>
     // === ДАННЫЕ ГРАФА ===
-    const rawGraphXML = `<?xml version="1.0" encoding="UTF-8"?><graphml><graph id="Graph" uidGraph="100" uidEdge="11378">
-    <node id="0" mainText="1" /><node id="1" mainText="2" /><node id="2" mainText="46" /><node id="3" mainText="43" /><node id="4" mainText="62" /><node id="5" mainText="5" /><node id="6" mainText="22" /><node id="7" mainText="3" /><node id="8" mainText="6" /><node id="9" mainText="34" /><node id="10" mainText="37" /><node id="11" mainText="38" /><node id="12" mainText="15" /><node id="13" mainText="55" /><node id="14" mainText="4" /><node id="15" mainText="36" /><node id="16" mainText="90" /><node id="17" mainText="52" /><node id="18" mainText="75" /><node id="19" mainText="23" /><node id="20" mainText="7" /><node id="21" mainText="99" /><node id="22" mainText="84" /><node id="23" mainText="65" /><node id="24" mainText="41" /><node id="25" mainText="49" /><node id="26" mainText="8" /><node id="27" mainText="83" /><node id="28" mainText="9" /><node id="29" mainText="25" /><node id="30" mainText="70" /><node id="31" mainText="26" /><node id="32" mainText="58" /><node id="33" mainText="28" /><node id="34" mainText="74" /><node id="35" mainText="59" /><node id="36" mainText="10" /><node id="37" mainText="66" /><node id="38" mainText="85" /><node id="39" mainText="11" /><node id="40" mainText="98" /><node id="41" mainText="54" /><node id="42" mainText="14" /><node id="43" mainText="12" /><node id="44" mainText="40" /><node id="45" mainText="27" /><node id="46" mainText="13" /><node id="47" mainText="35" /><node id="48" mainText="86" /><node id="49" mainText="30" /><node id="50" mainText="16" /><node id="51" mainText="72" /><node id="52" mainText="53" /><node id="53" mainText="76" /><node id="54" mainText="24" /><node id="55" mainText="17" /><node id="56" mainText="20" /><node id="57" mainText="18" /><node id="58" mainText="19" /><node id="59" mainText="29" /><node id="60" mainText="79" /><node id="61" mainText="68" /><node id="62" mainText="97" /><node id="63" mainText="21" /><node id="64" mainText="91" /><node id="65" mainText="63" /><node id="66" mainText="94" /><node id="67" mainText="78" /><node id="68" mainText="95" /><node id="69" mainText="56" /><node id="70" mainText="33" /><node id="71" mainText="93" /><node id="72" mainText="69" /><node id="73" mainText="32" /><node id="74" mainText="39" /><node id="75" mainText="50" /><node id="76" mainText="31" /><node id="77" mainText="67" /><node id="78" mainText="89" /><node id="79" mainText="77" /><node id="80" mainText="48" /><node id="81" mainText="47" /><node id="82" mainText="80" /><node id="83" mainText="45" /><node id="84" mainText="61" /><node id="85" mainText="42" /><node id="86" mainText="87" /><node id="87" mainText="57" /><node id="88" mainText="44" /><node id="89" mainText="82" /><node id="90" mainText="71" /><node id="91" mainText="73" /><node id="92" mainText="60" /><node id="93" mainText="51" /><node id="94" mainText="92" /><node id="95" mainText="100" /><node id="96" mainText="81" /><node id="97" mainText="88" /><node id="98" mainText="64" /><node id="99" mainText="96" />
-    <edge source="0" target="1" /><edge source="0" target="2" /><edge source="0" target="3" /><edge source="0" target="4" /><edge source="1" target="5" /><edge source="1" target="6" /><edge source="7" target="8" /><edge source="7" target="9" /><edge source="7" target="10" /><edge source="7" target="11" /><edge source="7" target="12" /><edge source="7" target="13" /><edge source="14" target="7" /><edge source="14" target="15" /><edge source="14" target="16" /><edge source="5" target="14" /><edge source="5" target="3" /><edge source="5" target="17" /><edge source="5" target="18" /><edge source="5" target="16" /><edge source="5" target="19" /><edge source="8" target="0" /><edge source="8" target="20" /><edge source="8" target="21" /><edge source="8" target="22" /><edge source="8" target="23" /><edge source="8" target="24" /><edge source="20" target="25" /><edge source="20" target="26" /><edge source="20" target="27" /><edge source="20" target="13" /><edge source="26" target="28" /><edge source="26" target="29" /><edge source="26" target="12" /><edge source="26" target="30" /><edge source="26" target="25" /><edge source="26" target="23" /><edge source="28" target="31" /><edge source="28" target="32" /><edge source="28" target="33" /><edge source="28" target="7" /><edge source="28" target="34" /><edge source="28" target="35" /><edge source="28" target="36" /><edge source="28" target="37" /><edge source="28" target="38" /><edge source="36" target="39" /><edge source="36" target="40" /><edge source="36" target="41" /><edge source="39" target="42" /><edge source="39" target="43" /><edge source="39" target="44" /><edge source="43" target="12" /><edge source="43" target="45" /><edge source="43" target="28" /><edge source="46" target="12" /><edge source="46" target="44" /><edge source="46" target="30" /><edge source="46" target="47" /><edge source="42" target="12" /><edge source="42" target="48" /><edge source="42" target="14" /><edge source="42" target="49" /><edge source="12" target="50" /><edge source="12" target="18" /><edge source="12" target="51" /><edge source="12" target="52" /><edge source="12" target="20" /><edge source="12" target="5" /><edge source="50" target="53" /><edge source="50" target="9" /><edge source="50" target="54" /><edge source="50" target="27" /><edge source="50" target="45" /><edge source="50" target="20" /><edge source="50" target="55" /><edge source="55" target="56" /><edge source="55" target="57" /><edge source="57" target="58" /><edge source="57" target="59" /><edge source="58" target="15" /><edge source="58" target="60" /><edge source="58" target="61" /><edge source="58" target="29" /><edge source="58" target="56" /><edge source="58" target="22" /><edge source="58" target="62" /><edge source="56" target="63" /><edge source="56" target="12" /><edge source="56" target="48" /><edge source="56" target="64" /><edge source="63" target="44" /><edge source="63" target="6" /><edge source="63" target="65" /><edge source="63" target="3" /><edge source="63" target="50" /><edge source="6" target="29" /><edge source="6" target="56" /><edge source="6" target="58" /><edge source="6" target="66" /><edge source="6" target="63" /><edge source="6" target="50" /><edge source="19" target="67" /><edge source="19" target="68" /><edge source="19" target="43" /><edge source="19" target="40" /><edge source="54" target="1" /><edge source="54" target="42" /><edge source="54" target="69" /><edge source="54" target="48" /><edge source="54" target="70" /><edge source="54" target="71" /><edge source="54" target="72" /><edge source="29" target="31" /><edge source="29" target="12" /><edge source="31" target="57" /><edge source="31" target="2" /><edge source="31" target="69" /><edge source="45" target="73" /><edge source="45" target="74" /><edge source="45" target="5" /><edge source="45" target="71" /><edge source="45" target="73" /><edge source="45" target="75" /><edge source="33" target="45" /><edge source="33" target="24" /><edge source="59" target="33" /><edge source="59" target="23" /><edge source="59" target="29" /><edge source="59" target="44" /><edge source="49" target="76" /><edge source="49" target="77" /><edge source="49" target="56" /><edge source="49" target="16" /><edge source="49" target="35" /><edge source="49" target="78" /><edge source="49" target="43" /><edge source="76" target="21" /><edge source="76" target="79" /><edge source="76" target="80" /><edge source="76" target="68" /><edge source="76" target="30" /><edge source="76" target="70" /><edge source="73" target="36" /><edge source="73" target="42" /><edge source="70" target="7" /><edge source="70" target="32" /><edge source="70" target="4" /><edge source="70" target="22" /><edge source="70" target="81" /><edge source="70" target="40" /><edge source="70" target="81" /><edge source="9" target="82" /><edge source="9" target="14" /><edge source="9" target="50" /><edge source="9" target="83" /><edge source="9" target="84" /><edge source="9" target="71" /><edge source="47" target="50" /><edge source="47" target="85" /><edge source="15" target="7" /><edge source="15" target="70" /><edge source="10" target="58" /><edge source="10" target="37" /><edge source="10" target="0" /><edge source="10" target="42" /><edge source="10" target="72" /><edge source="10" target="15" /><edge source="11" target="86" /><edge source="11" target="13" /><edge source="11" target="74" /><edge source="74" target="39" /><edge source="74" target="87" /><edge source="74" target="41" /><edge source="44" target="80" /><edge source="44" target="33" /><edge source="44" target="19" /><edge source="44" target="26" /><edge source="44" target="39" /><edge source="24" target="85" /><edge source="24" target="23" /><edge source="85" target="1" /><edge source="85" target="78" /><edge source="3" target="9" /><edge source="3" target="7" /><edge source="3" target="28" /><edge source="3" target="80" /><edge source="3" target="28" /><edge source="88" target="31" /><edge source="88" target="32" /><edge source="88" target="33" /><edge source="88" target="7" /><edge source="88" target="34" /><edge source="83" target="0" /><edge source="83" target="3" /><edge source="83" target="89" /><edge source="83" target="90" /><edge source="83" target="51" /><edge source="83" target="24" /><edge source="83" target="5" /><edge source="2" target="58" /><edge source="2" target="51" /><edge source="2" target="74" /><edge source="2" target="10" /><edge source="2" target="61" /><edge source="81" target="80" /><edge source="81" target="8" /><edge source="81" target="85" /><edge source="80" target="25" /><edge source="80" target="84" /><edge source="80" target="29" /><edge source="80" target="7" /><edge source="25" target="45" /><edge source="25" target="87" /><edge source="25" target="73" /><edge source="25" target="43" /><edge source="25" target="69" /><edge source="25" target="17" /><edge source="75" target="91" /><edge source="75" target="92" /><edge source="93" target="71" /><edge source="93" target="79" /><edge source="93" target="46" /><edge source="93" target="11" /><edge source="93" target="34" /><edge source="93" target="18" /><edge source="17" target="26" /><edge source="17" target="21" /><edge source="52" target="41" /><edge source="52" target="71" /><edge source="52" target="94" /><edge source="52" target="61" /><edge source="41" target="13" /><edge source="41" target="86" /><edge source="13" target="61" /><edge source="13" target="95" /><edge source="13" target="14" /><edge source="13" target="4" /><edge source="13" target="38" /><edge source="13" target="33" /><edge source="13" target="66" /><edge source="69" target="67" /><edge source="69" target="44" /><edge source="69" target="79" /><edge source="69" target="96" /><edge source="69" target="97" /><edge source="69" target="53" /><edge source="87" target="98" /><edge source="87" target="11" /><edge source="87" target="83" /><edge source="87" target="46" /><edge source="87" target="36" /><edge source="87" target="7" /><edge source="87" target="0" /><edge source="32" target="85" /><edge source="32" target="23" /><edge source="32" target="31" /><edge source="32" target="52" /><edge source="32" target="2" /><edge source="32" target="80" /><edge source="32" target="5" /><edge source="32" target="45" /><edge source="35" target="92" /><edge source="35" target="77" /><edge source="35" target="38" /><edge source="92" target="11" /><edge source="92" target="80" /><edge source="92" target="90" /><edge source="92" target="57" /><edge source="92" target="32" /><edge source="84" target="52" /><edge source="84" target="57" /><edge source="84" target="71" /><edge source="84" target="8" /><edge source="84" target="4" /><edge source="84" target="8" /><edge source="84" target="91" /><edge source="4" target="65" /><edge source="4" target="21" /><edge source="4" target="34" /><edge source="65" target="0" /><edge source="65" target="87" /><edge source="65" target="70" /><edge source="65" target="97" /><edge source="98" target="20" /><edge source="98" target="97" /><edge source="98" target="59" /><edge source="23" target="37" /><edge source="23" target="75" /><edge source="23" target="82" /><edge source="23" target="79" /><edge source="37" target="60" /><edge source="37" target="29" /><edge source="37" target="35" /><edge source="37" target="35" /><edge source="37" target="87" /><edge source="37" target="82" /><edge source="37" target="26" /><edge source="77" target="61" /><edge source="77" target="52" /><edge source="77" target="83" /><edge source="77" target="75" /><edge source="77" target="62" /><edge source="61" target="24" /><edge source="61" target="9" /><edge source="61" target="11" /><edge source="61" target="72" /><edge source="72" target="43" /><edge source="72" target="18" /><edge source="72" target="96" /><edge source="72" target="17" /><edge source="72" target="65" /><edge source="72" target="58" /><edge source="30" target="54" /><edge source="30" target="85" /><edge source="30" target="1" /><edge source="30" target="92" /><edge source="30" target="37" /><edge source="90" target="75" /><edge source="90" target="49" /><edge source="90" target="92" /><edge source="90" target="15" /><edge source="51" target="91" /><edge source="51" target="93" /><edge source="91" target="30" /><edge source="91" target="31" /><edge source="91" target="66" /><edge source="91" target="58" /><edge source="91" target="62" /><edge source="34" target="19" /><edge source="34" target="76" /><edge source="18" target="27" /><edge source="18" target="47" /><edge source="18" target="86" /><edge source="18" target="87" /><edge source="53" target="60" /><edge source="53" target="99" /><edge source="53" target="1" /><edge source="53" target="19" /><edge source="53" target="80" /><edge source="53" target="13" /><edge source="79" target="91" /><edge source="79" target="85" /><edge source="79" target="51" /><edge source="79" target="37" /><edge source="67" target="60" /><edge source="67" target="52" /><edge source="67" target="88" /><edge source="67" target="64" /><edge source="60" target="72" /><edge source="60" target="27" /><edge source="60" target="54" /><edge source="60" target="86" /><edge source="60" target="92" /><edge source="60" target="7" /><edge source="60" target="1" /><edge source="82" target="96" /><edge source="82" target="50" /><edge source="96" target="83" /><edge source="96" target="94" /><edge source="96" target="9" /><edge source="96" target="57" /><edge source="96" target="31" /><edge source="96" target="57" /><edge source="96" target="73" /><edge source="89" target="82" /><edge source="89" target="60" /><edge source="89" target="1" /><edge source="89" target="79" /><edge source="27" target="8" /><edge source="27" target="80" /><edge source="27" target="91" /><edge source="27" target="71" /><edge source="27" target="63" /><edge source="22" target="31" /><edge source="22" target="29" /><edge source="22" target="56" /><edge source="22" target="74" /><edge source="22" target="56" /><edge source="22" target="33" /><edge source="38" target="41" /><edge source="38" target="7" /><edge source="38" target="29" /><edge source="38" target="94" /><edge source="48" target="41" /><edge source="48" target="8" /><edge source="48" target="37" /><edge source="86" target="84" /><edge source="86" target="82" /><edge source="86" target="97" /><edge source="86" target="20" /><edge source="86" target="87" /><edge source="97" target="53" /><edge source="97" target="19" /><edge source="97" target="68" /><edge source="97" target="16" /><edge source="97" target="53" /><edge source="97" target="86" /><edge source="97" target="99" /><edge source="78" target="34" /><edge source="78" target="29" /><edge source="78" target="58" /><edge source="78" target="99" /><edge source="16" target="33" /><edge source="16" target="35" /><edge source="16" target="84" /><edge source="16" target="52" /><edge source="16" target="2" /><edge source="16" target="14" /><edge source="64" target="51" /><edge source="64" target="98" /><edge source="94" target="77" /><edge source="94" target="43" /><edge source="94" target="67" /><edge source="94" target="31" /><edge source="94" target="53" /><edge source="94" target="30" /><edge source="94" target="28" /><edge source="71" target="95" /><edge source="71" target="76" /><edge source="71" target="81" /><edge source="71" target="44" /><edge source="71" target="94" /><edge source="71" target="91" /><edge source="66" target="59" /><edge source="66" target="57" /><edge source="66" target="45" /><edge source="66" target="93" /><edge source="66" target="85" /><edge source="66" target="64" /><edge source="66" target="85" /><edge source="68" target="78" /><edge source="68" target="4" /><edge source="68" target="61" /><edge source="68" target="99" /><edge source="68" target="60" /><edge source="99" target="62" /><edge source="99" target="83" /><edge source="99" target="63" /><edge source="99" target="63" /><edge source="99" target="28" /><edge source="62" target="73" /><edge source="62" target="89" /><edge source="40" target="17" /><edge source="40" target="74" /><edge source="21" target="60" /><edge source="21" target="57" /><edge source="21" target="29" /><edge source="21" target="57" /><edge source="21" target="81" /><edge source="21" target="15" /><edge source="21" target="10" /><edge source="21" target="20" /><edge source="95" target="80" /><edge source="95" target="33" /><edge source="95" target="55" /><edge source="95" target="25" /><edge source="95" target="72" /><edge source="38" target="51" /></graph></graphml>`;
+    const rawGraphXML = `<?xml version="1.0" encoding="UTF-8"?><graphml><graph id="Graph" uidGraph="100" uidEdge="11378"><node id="0" mainText="1" /><node id="1" mainText="2" /><node id="2" mainText="46" /><node id="3" mainText="43" /><node id="4" mainText="62" /><node id="5" mainText="5" /><node id="6" mainText="22" /><node id="7" mainText="3" /><node id="8" mainText="6" /><node id="9" mainText="34" /><node id="10" mainText="37" /><node id="11" mainText="38" /><node id="12" mainText="15" /><node id="13" mainText="55" /><node id="14" mainText="4" /><node id="15" mainText="36" /><node id="16" mainText="90" /><node id="17" mainText="52" /><node id="18" mainText="75" /><node id="19" mainText="23" /><node id="20" mainText="7" /><node id="21" mainText="99" /><node id="22" mainText="84" /><node id="23" mainText="65" /><node id="24" mainText="41" /><node id="25" mainText="49" /><node id="26" mainText="8" /><node id="27" mainText="83" /><node id="28" mainText="9" /><node id="29" mainText="25" /><node id="30" mainText="70" /><node id="31" mainText="26" /><node id="32" mainText="58" /><node id="33" mainText="28" /><node id="34" mainText="74" /><node id="35" mainText="59" /><node id="36" mainText="10" /><node id="37" mainText="66" /><node id="38" mainText="85" /><node id="39" mainText="11" /><node id="40" mainText="98" /><node id="41" mainText="54" /><node id="42" mainText="14" /><node id="43" mainText="12" /><node id="44" mainText="40" /><node id="45" mainText="27" /><node id="46" mainText="13" /><node id="47" mainText="35" /><node id="48" mainText="86" /><node id="49" mainText="30" /><node id="50" mainText="16" /><node id="51" mainText="72" /><node id="52" mainText="53" /><node id="53" mainText="76" /><node id="54" mainText="24" /><node id="55" mainText="17" /><node id="56" mainText="20" /><node id="57" mainText="18" /><node id="58" mainText="19" /><node id="59" mainText="29" /><node id="60" mainText="79" /><node id="61" mainText="68" /><node id="62" mainText="97" /><node id="63" mainText="21" /><node id="64" mainText="91" /><node id="65" mainText="63" /><node id="66" mainText="94" /><node id="67" mainText="78" /><node id="68" mainText="95" /><node id="69" mainText="56" /><node id="70" mainText="33" /><node id="71" mainText="93" /><node id="72" mainText="69" /><node id="73" mainText="32" /><node id="74" mainText="39" /><node id="75" mainText="50" /><node id="76" mainText="31" /><node id="77" mainText="67" /><node id="78" mainText="89" /><node id="79" mainText="77" /><node id="80" mainText="48" /><node id="81" mainText="47" /><node id="82" mainText="80" /><node id="83" mainText="45" /><node id="84" mainText="61" /><node id="85" mainText="42" /><node id="86" mainText="87" /><node id="87" mainText="57" /><node id="88" mainText="44" /><node id="89" mainText="82" /><node id="90" mainText="71" /><node id="91" mainText="73" /><node id="92" mainText="60" /><node id="93" mainText="51" /><node id="94" mainText="92" /><node id="95" mainText="100" /><node id="96" mainText="81" /><node id="97" mainText="88" /><node id="98" mainText="64" /><node id="99" mainText="96" /><edge source="0" target="1" /><edge source="0" target="2" /><edge source="0" target="3" /><edge source="0" target="4" /><edge source="1" target="5" /><edge source="1" target="6" /><edge source="7" target="8" /><edge source="7" target="9" /><edge source="7" target="10" /><edge source="7" target="11" /><edge source="7" target="12" /><edge source="7" target="13" /><edge source="14" target="7" /><edge source="14" target="15" /><edge source="14" target="16" /><edge source="5" target="14" /><edge source="5" target="3" /><edge source="5" target="17" /><edge source="5" target="18" /><edge source="5" target="16" /><edge source="5" target="19" /><edge source="8" target="0" /><edge source="8" target="20" /><edge source="8" target="21" /><edge source="8" target="22" /><edge source="8" target="23" /><edge source="8" target="24" /><edge source="20" target="25" /><edge source="20" target="26" /><edge source="20" target="27" /><edge source="20" target="13" /><edge source="26" target="28" /><edge source="26" target="29" /><edge source="26" target="12" /><edge source="26" target="30" /><edge source="26" target="25" /><edge source="26" target="23" /><edge source="28" target="31" /><edge source="28" target="32" /><edge source="28" target="33" /><edge source="28" target="7" /><edge source="28" target="34" /><edge source="28" target="35" /><edge source="28" target="36" /><edge source="28" target="37" /><edge source="28" target="38" /><edge source="36" target="39" /><edge source="36" target="40" /><edge source="36" target="41" /><edge source="39" target="42" /><edge source="39" target="43" /><edge source="39" target="44" /><edge source="43" target="12" /><edge source="43" target="45" /><edge source="43" target="28" /><edge source="46" target="12" /><edge source="46" target="44" /><edge source="46" target="30" /><edge source="46" target="47" /><edge source="42" target="12" /><edge source="42" target="48" /><edge source="42" target="14" /><edge source="42" target="49" /><edge source="12" target="50" /><edge source="12" target="18" /><edge source="12" target="51" /><edge source="12" target="52" /><edge source="12" target="20" /><edge source="12" target="5" /><edge source="50" target="53" /><edge source="50" target="9" /><edge source="50" target="54" /><edge source="50" target="27" /><edge source="50" target="45" /><edge source="50" target="20" /><edge source="50" target="55" /><edge source="55" target="56" /><edge source="55" target="57" /><edge source="57" target="58" /><edge source="57" target="59" /><edge source="58" target="15" /><edge source="58" target="60" /><edge source="58" target="61" /><edge source="58" target="29" /><edge source="58" target="56" /><edge source="58" target="22" /><edge source="58" target="62" /><edge source="56" target="63" /><edge source="56" target="12" /><edge source="56" target="48" /><edge source="56" target="64" /><edge source="63" target="44" /><edge source="63" target="6" /><edge source="63" target="65" /><edge source="63" target="3" /><edge source="63" target="50" /><edge source="6" target="29" /><edge source="6" target="56" /><edge source="6" target="58" /><edge source="6" target="66" /><edge source="6" target="63" /><edge source="6" target="50" /><edge source="19" target="67" /><edge source="19" target="68" /><edge source="19" target="43" /><edge source="19" target="40" /><edge source="54" target="1" /><edge source="54" target="42" /><edge source="54" target="69" /><edge source="54" target="48" /><edge source="54" target="70" /><edge source="54" target="71" /><edge source="54" target="72" /><edge source="29" target="31" /><edge source="29" target="12" /><edge source="31" target="57" /><edge source="31" target="2" /><edge source="31" target="69" /><edge source="45" target="73" /><edge source="45" target="74" /><edge source="45" target="5" /><edge source="45" target="71" /><edge source="45" target="73" /><edge source="45" target="75" /><edge source="33" target="45" /><edge source="33" target="24" /><edge source="59" target="33" /><edge source="59" target="23" /><edge source="59" target="29" /><edge source="59" target="44" /><edge source="49" target="76" /><edge source="49" target="77" /><edge source="49" target="56" /><edge source="49" target="16" /><edge source="49" target="35" /><edge source="49" target="78" /><edge source="49" target="43" /><edge source="76" target="21" /><edge source="76" target="79" /><edge source="76" target="80" /><edge source="76" target="68" /><edge source="76" target="30" /><edge source="76" target="70" /><edge source="73" target="36" /><edge source="73" target="42" /><edge source="70" target="7" /><edge source="70" target="32" /><edge source="70" target="4" /><edge source="70" target="22" /><edge source="70" target="81" /><edge source="70" target="40" /><edge source="70" target="81" /><edge source="9" target="82" /><edge source="9" target="14" /><edge source="9" target="50" /><edge source="9" target="83" /><edge source="9" target="84" /><edge source="9" target="71" /><edge source="47" target="50" /><edge source="47" target="85" /><edge source="15" target="7" /><edge source="15" target="70" /><edge source="10" target="58" /><edge source="10" target="37" /><edge source="10" target="0" /><edge source="10" target="42" /><edge source="10" target="72" /><edge source="10" target="15" /><edge source="11" target="86" /><edge source="11" target="13" /><edge source="11" target="74" /><edge source="74" target="39" /><edge source="74" target="87" /><edge source="74" target="41" /><edge source="44" target="80" /><edge source="44" target="33" /><edge source="44" target="19" /><edge source="44" target="26" /><edge source="44" target="39" /><edge source="24" target="85" /><edge source="24" target="23" /><edge source="85" target="1" /><edge source="85" target="78" /><edge source="3" target="9" /><edge source="3" target="7" /><edge source="3" target="28" /><edge source="3" target="80" /><edge source="3" target="28" /><edge source="88" target="31" /><edge source="88" target="32" /><edge source="88" target="33" /><edge source="88" target="7" /><edge source="88" target="34" /><edge source="83" target="0" /><edge source="83" target="3" /><edge source="83" target="89" /><edge source="83" target="90" /><edge source="83" target="51" /><edge source="83" target="24" /><edge source="83" target="5" /><edge source="2" target="58" /><edge source="2" target="51" /><edge source="2" target="74" /><edge source="2" target="10" /><edge source="2" target="61" /><edge source="81" target="80" /><edge source="81" target="8" /><edge source="81" target="85" /><edge source="80" target="25" /><edge source="80" target="84" /><edge source="80" target="29" /><edge source="80" target="7" /><edge source="25" target="45" /><edge source="25" target="87" /><edge source="25" target="73" /><edge source="25" target="43" /><edge source="25" target="69" /><edge source="25" target="17" /><edge source="75" target="91" /><edge source="75" target="92" /><edge source="93" target="71" /><edge source="93" target="79" /><edge source="93" target="46" /><edge source="93" target="11" /><edge source="93" target="34" /><edge source="93" target="18" /><edge source="17" target="26" /><edge source="17" target="21" /><edge source="52" target="41" /><edge source="52" target="71" /><edge source="52" target="94" /><edge source="52" target="61" /><edge source="41" target="13" /><edge source="41" target="86" /><edge source="13" target="61" /><edge source="13" target="95" /><edge source="13" target="14" /><edge source="13" target="4" /><edge source="13" target="38" /><edge source="13" target="33" /><edge source="13" target="66" /><edge source="69" target="67" /><edge source="69" target="44" /><edge source="69" target="79" /><edge source="69" target="96" /><edge source="69" target="97" /><edge source="69" target="53" /><edge source="87" target="98" /><edge source="87" target="11" /><edge source="87" target="83" /><edge source="87" target="46" /><edge source="87" target="36" /><edge source="87" target="7" /><edge source="87" target="0" /><edge source="32" target="85" /><edge source="32" target="23" /><edge source="32" target="31" /><edge source="32" target="52" /><edge source="32" target="2" /><edge source="32" target="80" /><edge source="32" target="5" /><edge source="32" target="45" /><edge source="35" target="92" /><edge source="35" target="77" /><edge source="35" target="38" /><edge source="92" target="11" /><edge source="92" target="80" /><edge source="92" target="90" /><edge source="92" target="57" /><edge source="92" target="32" /><edge source="84" target="52" /><edge source="84" target="57" /><edge source="84" target="71" /><edge source="84" target="8" /><edge source="84" target="4" /><edge source="84" target="8" /><edge source="84" target="91" /><edge source="4" target="65" /><edge source="4" target="21" /><edge source="4" target="34" /><edge source="65" target="0" /><edge source="65" target="87" /><edge source="65" target="70" /><edge source="65" target="97" /><edge source="98" target="20" /><edge source="98" target="97" /><edge source="98" target="59" /><edge source="23" target="37" /><edge source="23" target="75" /><edge source="23" target="82" /><edge source="23" target="79" /><edge source="37" target="60" /><edge source="37" target="29" /><edge source="37" target="35" /><edge source="37" target="35" /><edge source="37" target="87" /><edge source="37" target="82" /><edge source="37" target="26" /><edge source="77" target="61" /><edge source="77" target="52" /><edge source="77" target="83" /><edge source="77" target="75" /><edge source="77" target="62" /><edge source="61" target="24" /><edge source="61" target="9" /><edge source="61" target="11" /><edge source="61" target="72" /><edge source="72" target="43" /><edge source="72" target="18" /><edge source="72" target="96" /><edge source="72" target="17" /><edge source="72" target="65" /><edge source="72" target="58" /><edge source="30" target="54" /><edge source="30" target="85" /><edge source="30" target="1" /><edge source="30" target="92" /><edge source="30" target="37" /><edge source="90" target="75" /><edge source="90" target="49" /><edge source="90" target="92" /><edge source="90" target="15" /><edge source="51" target="91" /><edge source="51" target="93" /><edge source="91" target="30" /><edge source="91" target="31" /><edge source="91" target="66" /><edge source="91" target="58" /><edge source="91" target="62" /><edge source="34" target="19" /><edge source="34" target="76" /><edge source="18" target="27" /><edge source="18" target="47" /><edge source="18" target="86" /><edge source="18" target="87" /><edge source="53" target="60" /><edge source="53" target="99" /><edge source="53" target="1" /><edge source="53" target="19" /><edge source="53" target="80" /><edge source="53" target="13" /><edge source="79" target="91" /><edge source="79" target="85" /><edge source="79" target="51" /><edge source="79" target="37" /><edge source="67" target="60" /><edge source="67" target="52" /><edge source="67" target="88" /><edge source="67" target="64" /><edge source="60" target="72" /><edge source="60" target="27" /><edge source="60" target="54" /><edge source="60" target="86" /><edge source="60" target="92" /><edge source="60" target="7" /><edge source="60" target="1" /><edge source="82" target="96" /><edge source="82" target="50" /><edge source="96" target="83" /><edge source="96" target="94" /><edge source="96" target="9" /><edge source="96" target="57" /><edge source="96" target="31" /><edge source="96" target="57" /><edge source="96" target="73" /><edge source="89" target="82" /><edge source="89" target="60" /><edge source="89" target="1" /><edge source="89" target="79" /><edge source="27" target="8" /><edge source="27" target="80" /><edge source="27" target="91" /><edge source="27" target="71" /><edge source="27" target="63" /><edge source="22" target="31" /><edge source="22" target="29" /><edge source="22" target="56" /><edge source="22" target="74" /><edge source="22" target="56" /><edge source="22" target="33" /><edge source="38" target="41" /><edge source="38" target="7" /><edge source="38" target="29" /><edge source="38" target="94" /><edge source="48" target="41" /><edge source="48" target="8" /><edge source="48" target="37" /><edge source="86" target="84" /><edge source="86" target="82" /><edge source="86" target="97" /><edge source="86" target="20" /><edge source="86" target="87" /><edge source="97" target="53" /><edge source="97" target="19" /><edge source="97" target="68" /><edge source="97" target="16" /><edge source="97" target="53" /><edge source="97" target="86" /><edge source="97" target="99" /><edge source="78" target="34" /><edge source="78" target="29" /><edge source="78" target="58" /><edge source="78" target="99" /><edge source="16" target="33" /><edge source="16" target="35" /><edge source="16" target="84" /><edge source="16" target="52" /><edge source="16" target="2" /><edge source="16" target="14" /><edge source="64" target="51" /><edge source="64" target="98" /><edge source="94" target="77" /><edge source="94" target="43" /><edge source="94" target="67" /><edge source="94" target="31" /><edge source="94" target="53" /><edge source="94" target="30" /><edge source="94" target="28" /><edge source="71" target="95" /><edge source="71" target="76" /><edge source="71" target="81" /><edge source="71" target="44" /><edge source="71" target="94" /><edge source="71" target="91" /><edge source="66" target="59" /><edge source="66" target="57" /><edge source="66" target="45" /><edge source="66" target="93" /><edge source="66" target="85" /><edge source="66" target="64" /><edge source="66" target="85" /><edge source="68" target="78" /><edge source="68" target="4" /><edge source="68" target="61" /><edge source="68" target="99" /><edge source="68" target="60" /><edge source="99" target="62" /><edge source="99" target="83" /><edge source="99" target="63" /><edge source="99" target="63" /><edge source="99" target="28" /><edge source="62" target="73" /><edge source="62" target="89" /><edge source="40" target="17" /><edge source="40" target="74" /><edge source="21" target="60" /><edge source="21" target="57" /><edge source="21" target="29" /><edge source="21" target="57" /><edge source="21" target="81" /><edge source="21" target="15" /><edge source="21" target="10" /><edge source="21" target="20" /><edge source="95" target="80" /><edge source="95" target="33" /><edge source="95" target="55" /><edge source="95" target="25" /><edge source="95" target="72" /><edge source="38" target="51" /></graph></graphml>`;
 
     let adjacency = {};
     let idToLabel = {};
     let labelToId = {};
-    let currentPathString = ""; // Хранит последний найденный путь текстом
 
     function parseGraph() {
         const parser = new DOMParser();
         const xmlDoc = parser.parseFromString(rawGraphXML, "text/xml");
-
         const nodes = xmlDoc.getElementsByTagName("node");
         for (let i = 0; i < nodes.length; i++) {
             const id = nodes[i].getAttribute("id");
             const label = nodes[i].getAttribute("mainText");
-            if (id && label) {
-                idToLabel[id] = label;
-                labelToId[label] = id;
-            }
+            if (id && label) { idToLabel[id] = label; labelToId[label] = id; }
         }
-
         const edges = xmlDoc.getElementsByTagName("edge");
         for (let i = 0; i < edges.length; i++) {
             const source = edges[i].getAttribute("source");
             const target = edges[i].getAttribute("target");
-            
             if (!adjacency[source]) adjacency[source] = [];
             adjacency[source].push(target);
         }
     }
 
-    // Функция обмена значениями
-    function swapInputs() {
-        const startInput = document.getElementById("startNode");
-        const endInput = document.getElementById("endNode");
-        
-        const temp = startInput.value;
-        startInput.value = endInput.value;
-        endInput.value = temp;
-        
-        // Сброс результата при обмене
-        document.getElementById("result").innerHTML = "Данные поменялись. Нажмите 'Найти маршрут'.";
-        document.getElementById("copyBtn").style.display = "none";
-        document.getElementById("result").style.color = "#94a3b8";
+    // --- ЛОГИКА ИНТЕРФЕЙСА ---
+
+    function addWaypoint() {
+        const container = document.getElementById("waypointsContainer");
+        const div = document.createElement("div");
+        div.className = "waypoint-row";
+        div.innerHTML = `
+            <input type="text" class="waypoint-input" placeholder="Заехать в...">
+            <button class="remove-btn" onclick="this.parentElement.remove()">×</button>
+        `;
+        container.appendChild(div);
     }
 
-    function findShortestPath() {
+    function swapInputs() {
+        const start = document.getElementById("startNode");
+        const end = document.getElementById("endNode");
+        [start.value, end.value] = [end.value, start.value];
+    }
+
+    // --- ЛОГИКА ПОИСКА ---
+
+    function calculateRoute() {
         const startLabel = document.getElementById("startNode").value.trim();
         const endLabel = document.getElementById("endNode").value.trim();
         const resultDiv = document.getElementById("result");
-        const copyBtn = document.getElementById("copyBtn");
+        resultDiv.innerHTML = "";
 
-        // Сброс кнопки копирования
-        copyBtn.style.display = "none";
-        copyBtn.innerText = "📋 Копировать маршрут";
-        resultDiv.style.color = "#e2e8f0";
+        // Сбор промежуточных точек
+        const waypointInputs = document.querySelectorAll(".waypoint-input");
+        let waypoints = [];
+        for (let input of waypointInputs) {
+            const val = input.value.trim();
+            if (val) waypoints.push(val);
+        }
 
-        if (!labelToId[startLabel]) {
-            resultDiv.innerHTML = `<span class="error">Ошибка: Степь "${startLabel}" не найдена.</span>`;
+        // Проверка на валидность
+        if (!labelToId[startLabel] || !labelToId[endLabel]) {
+            resultDiv.innerHTML = `<span class="error">Ошибка: Проверьте номера старта и финиша.</span>`;
             return;
         }
-        if (!labelToId[endLabel]) {
-            resultDiv.innerHTML = `<span class="error">Ошибка: Степь "${endLabel}" не найдена.</span>`;
-            return;
+        for (let wp of waypoints) {
+            if (!labelToId[wp]) {
+                resultDiv.innerHTML = `<span class="error">Ошибка: Степь "${wp}" не найдена.</span>`;
+                return;
+            }
         }
 
         const startId = labelToId[startLabel];
         const endId = labelToId[endLabel];
+        const waypointIds = waypoints.map(w => labelToId[w]);
 
-        let queue = [[startId, [startId]]];
-        let visited = new Set([startId]);
-        let foundPath = null;
+        // СЦЕНАРИЙ 1: Просто старт -> финиш (ищем альтернативы)
+        if (waypointIds.length === 0) {
+            const allPaths = findAllShortestPaths(startId, endId);
+            if (allPaths.length === 0) {
+                resultDiv.innerHTML = `<span class="error">Пути нет.</span>`;
+            } else {
+                displayPaths(allPaths, resultDiv);
+            }
+        } 
+        // СЦЕНАРИЙ 2: Есть промежуточные точки (задача коммивояжера)
+        else {
+            findOptimizedRoute(startId, endId, waypointIds, resultDiv);
+        }
+    }
+
+    // --- АЛГОРИТМЫ ---
+
+    // 1. Поиск ВСЕХ кратчайших путей (BFS с восстановлением родителей)
+    function findAllShortestPaths(start, end) {
+        let queue = [start];
+        let dist = { [start]: 0 };
+        let parents = { [start]: [] };
 
         while (queue.length > 0) {
-            const [currentNode, path] = queue.shift();
+            let curr = queue.shift();
+            if (curr === end) continue; // Не останавливаемся, чтобы найти другие пути той же длины
 
-            if (currentNode === endId) {
-                foundPath = path;
-                break;
-            }
-
-            const neighbors = adjacency[currentNode] || [];
-            for (const neighbor of neighbors) {
-                if (!visited.has(neighbor)) {
-                    visited.add(neighbor);
-                    const newPath = [...path, neighbor];
-                    queue.push([neighbor, newPath]);
+            const neighbors = adjacency[curr] || [];
+            for (let neighbor of neighbors) {
+                if (dist[neighbor] === undefined) {
+                    dist[neighbor] = dist[curr] + 1;
+                    parents[neighbor] = [curr];
+                    queue.push(neighbor);
+                } else if (dist[neighbor] === dist[curr] + 1) {
+                    parents[neighbor].push(curr);
                 }
             }
         }
 
-        if (foundPath) {
-            const labelPath = foundPath.map(id => idToLabel[id]);
-            currentPathString = labelPath.join(" → ");
-            
-            resultDiv.innerHTML = `<span class="success">Маршрут найден! (${labelPath.length - 1} шагов)</span><br><span class="path-text">${currentPathString}</span>`;
-            copyBtn.style.display = "block"; // Показываем кнопку копирования
+        if (dist[end] === undefined) return [];
+
+        // Рекурсивно восстанавливаем пути
+        let resultPaths = [];
+        function buildPaths(current, path) {
+            if (current === start) {
+                resultPaths.push([start, ...path]);
+                return;
+            }
+            for (let p of parents[current] || []) {
+                buildPaths(p, [current, ...path]);
+            }
+        }
+        buildPaths(end, []);
+        return resultPaths;
+    }
+
+    // 2. Поиск оптимального порядка точек (Перестановки)
+    function findOptimizedRoute(start, end, waypoints, container) {
+        // Генерируем все варианты порядка точек
+        const perms = permutator(waypoints);
+        let bestPath = null;
+        let minLength = Infinity;
+        let bestOrderLabel = "";
+
+        // Перебираем варианты (например: А->Б->В или Б->А->В)
+        for (let perm of perms) {
+            let fullPath = [];
+            let currentLen = 0;
+            let currentPos = start;
+            let possible = true;
+
+            // Строим путь: Старт -> Точка1 -> Точка2 -> ... -> Финиш
+            const sequence = [...perm, end];
+
+            for (let nextTarget of sequence) {
+                // Ищем путь только для сегмента (здесь берем первый попавшийся кратчайший)
+                const paths = findAllShortestPaths(currentPos, nextTarget);
+                if (paths.length === 0) {
+                    possible = false;
+                    break;
+                }
+                // Берем первый путь, но убираем дублирование узла стыка
+                const segment = paths[0]; 
+                if (fullPath.length > 0) {
+                    fullPath.push(...segment.slice(1));
+                } else {
+                    fullPath.push(...segment);
+                }
+                currentLen += (segment.length - 1);
+                currentPos = nextTarget;
+            }
+
+            if (possible && currentLen < minLength) {
+                minLength = currentLen;
+                bestPath = fullPath;
+                bestOrderLabel = perm.map(id => idToLabel[id]).join(" → ");
+            }
+        }
+
+        if (bestPath) {
+            let html = `<div class="path-block">
+                <span class="path-title">⚡ Оптимальный маршрут (${minLength} шагов)</span>
+                <div class="info">Лучший порядок посещения: ${bestOrderLabel}</div>
+                <div class="path-text">${bestPath.map(id => idToLabel[id]).join(" → ")}</div>
+            </div>`;
+            container.innerHTML = html;
         } else {
-            resultDiv.innerHTML = `<span class="error">Маршрут от ${startLabel} до ${endLabel} невозможен (нет дороги).</span>`;
+            container.innerHTML = `<span class="error">Невозможно построить маршрут через все указанные точки.</span>`;
         }
     }
 
-    // Функция копирования в буфер обмена
-    function copyRoute() {
-        if (!currentPathString) return;
-
-        navigator.clipboard.writeText(currentPathString).then(() => {
-            const copyBtn = document.getElementById("copyBtn");
-            copyBtn.innerText = "✅ Скопировано!";
-            setTimeout(() => {
-                copyBtn.innerText = "📋 Копировать маршрут";
-            }, 2000);
-        }).catch(err => {
-            console.error('Ошибка копирования: ', err);
-            alert("Не удалось скопировать текст.");
-        });
+    // Вспомогательная функция для генерации перестановок
+    function permutator(inputArr) {
+        let result = [];
+        const permute = (arr, m = []) => {
+            if (arr.length === 0) {
+                result.push(m);
+            } else {
+                for (let i = 0; i < arr.length; i++) {
+                    let curr = arr.slice();
+                    let next = curr.splice(i, 1);
+                    permute(curr.slice(), m.concat(next));
+                }
+            }
+        }
+        permute(inputArr);
+        return result;
     }
 
-    parseGraph();
+    function displayPaths(paths, container) {
+        // Сортируем просто для порядка
+        let html = "";
+        paths.forEach((path, index) => {
+            const pathStr = path.map(id => idToLabel[id]).join(" → ");
+            const steps = path.length - 1;
+            
+            if (index === 0) {
+                html += `<div class="path-block">
+                            <span class="path-title">🚀 Основной маршрут (${steps} шагов)</span>
+                            <div class="path-text">${pathStr}</div>
+                         </div>`;
+            } else {
+                html += `<div class="path-block">
+                            <span class="alt-title">🔄 Альтернатива ${index} (тоже ${steps} шагов)</span>
+                            <div class="path-text">${pathStr}</div>
+                         </div>`;
+            }
+        });
+        container.innerHTML = html;
+    }
 
+    // Запуск
+    parseGraph();
 </script>
 
 </body>
