@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Навигатор по Степям 2.0</title>
+    <title>Навигатор по Степям</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            max-width: 650px;
+            max-width: 800px; /* Чуть шире для визуализации */
             margin: 2rem auto;
             padding: 0 1rem;
-            background-color: #0f172a;
+            background-color: #0f172a; /* Глубокий темный фон */
             color: #e2e8f0;
         }
 
@@ -25,7 +25,7 @@
             border: 1px solid #334155;
         }
 
-        .input-group { margin-bottom: 1rem; position: relative; }
+        .input-group { margin-bottom: 1rem; }
         label { display: block; margin-bottom: 0.4rem; font-size: 0.9rem; color: #cbd5e1; }
         
         input {
@@ -42,49 +42,28 @@
         }
         input:focus { border-color: #38bdf8; }
 
-        /* Контейнер для точек маршрута */
-        #waypointsContainer {
-            margin: 1rem 0;
-            padding-left: 1rem;
-            border-left: 2px dashed #475569;
-        }
-
-        .waypoint-row {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 10px;
-            animation: fadeIn 0.3s;
-        }
-
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
-
-        .remove-btn {
-            background: #ef4444;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            width: 40px;
-            font-size: 1.2rem;
-        }
-
+        /* Кнопки */
         .action-buttons {
             display: flex;
-            gap: 10px;
-            margin-bottom: 1.5rem;
+            justify-content: center;
+            margin: 1.5rem 0;
         }
 
-        .secondary-btn {
+        .icon-btn {
             background: #334155;
             color: #38bdf8;
             border: 1px solid #475569;
-            padding: 0.6rem 1rem;
-            border-radius: 6px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
             cursor: pointer;
-            flex: 1;
-            transition: 0.2s;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
         }
-        .secondary-btn:hover { background: #475569; }
+        .icon-btn:hover { background: #475569; transform: rotate(180deg); }
 
         .main-btn {
             width: 100%;
@@ -101,70 +80,135 @@
         }
         .main-btn:hover { opacity: 0.9; }
 
+        /* Блок результата */
         #result {
-            margin-top: 1.5rem;
-            padding: 1rem;
-            background-color: #0f172a;
-            border-radius: 6px;
-            border: 1px dashed #334155;
-            min-height: 50px;
+            margin-top: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
         }
 
-        .path-block { margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid #334155; }
-        .path-block:last-child { border-bottom: none; }
-        .path-title { color: #4ade80; font-weight: bold; display: block; margin-bottom: 5px; }
-        .alt-title { color: #facc15; font-weight: bold; display: block; margin-bottom: 5px; font-size: 0.9rem; }
-        .path-text { line-height: 1.6; word-break: break-word; }
-        .error { color: #f87171; }
-        .info { color: #94a3b8; font-size: 0.9rem; font-style: italic; }
+        /* --- СТИЛИ ВИЗУАЛИЗАЦИИ (СЕТКА) --- */
+        .step-container {
+            background: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .step-title {
+            color: #38bdf8;
+            font-weight: bold;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+
+        .steppe-grid {
+            display: grid;
+            grid-template-columns: repeat(10, 25px); /* 10 колонок по 25px */
+            grid-template-rows: repeat(6, 25px);    /* 6 рядов по 25px */
+            gap: 4px; /* Отступ между клетками */
+        }
+
+        .cell {
+            width: 25px;
+            height: 25px;
+            border-radius: 3px;
+            background-color: #334155; /* Цвет пустой клетки (бывший белый квадратик) */
+            opacity: 0.3;
+        }
+
+        .cell.exit {
+            background-color: #000; /* Черный квадратик (выход) */
+            opacity: 0.8;
+            border: 1px solid #475569;
+        }
+
+        /* ПОДСВЕТКА НУЖНОГО ПУТИ */
+        .cell.active-path {
+            background-color: #4ade80 !important; /* Ярко-зеленый */
+            box-shadow: 0 0 10px #4ade80;
+            opacity: 1;
+            animation: pulse 1.5s infinite;
+            border: 1px solid #fff;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+
+        .arrow-down {
+            color: #94a3b8;
+            font-size: 1.5rem;
+            margin: 5px 0;
+        }
+        
+        .copy-btn {
+            margin-top: 20px;
+            padding: 10px;
+            background: #334155;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        .error { color: #f87171; text-align: center; }
 
     </style>
 </head>
 <body>
 
 <div class="card">
-    <h1>🏔️ Умный Навигатор</h1>
-    <p>Поиск пути с учетом заезда в нужные степи</p>
+    <h1>🧭 Навигатор по Степям</h1>
+    <p>Введите номера степей от 1 до 100.</p>
 
     <div class="input-group">
-        <label>🏁 Старт (Откуда):</label>
-        <input type="text" id="startNode" placeholder="Например: 1">
+        <label>🏁 Старт:</label>
+        <input type="text" id="startNode" placeholder="1">
     </div>
-
-    <div id="waypointsContainer"></div>
 
     <div class="action-buttons">
-        <button class="secondary-btn" onclick="addWaypoint()">+ Заехать через...</button>
-        <button class="secondary-btn" onclick="swapInputs()">⇅ Поменять старт/финиш</button>
+        <button class="icon-btn" onclick="swapInputs()" title="Поменять местами">⇅</button>
     </div>
 
     <div class="input-group">
-        <label>🏁 Финиш (Куда):</label>
-        <input type="text" id="endNode" placeholder="Например: 55">
+        <label>🏁 Финиш:</label>
+        <input type="text" id="endNode" placeholder="100">
     </div>
 
-    <button class="main-btn" onclick="calculateRoute()">Построить лучший маршрут</button>
+    <button class="main-btn" onclick="calculateRoute()">Построить маршрут</button>
 
-    <div id="result">Результат отобразится здесь...</div>
+    <div id="result"></div>
+    <button id="copyBtn" class="copy-btn" style="display:none" onclick="copyRoute()">📋 Копировать текстом</button>
 </div>
 
 <script>
-    // === ДАННЫЕ ГРАФА ===
-    const rawGraphXML = `<?xml version="1.0" encoding="UTF-8"?><graphml><graph id="Graph" uidGraph="100" uidEdge="11378"><node id="0" mainText="1" /><node id="1" mainText="2" /><node id="2" mainText="46" /><node id="3" mainText="43" /><node id="4" mainText="62" /><node id="5" mainText="5" /><node id="6" mainText="22" /><node id="7" mainText="3" /><node id="8" mainText="6" /><node id="9" mainText="34" /><node id="10" mainText="37" /><node id="11" mainText="38" /><node id="12" mainText="15" /><node id="13" mainText="55" /><node id="14" mainText="4" /><node id="15" mainText="36" /><node id="16" mainText="90" /><node id="17" mainText="52" /><node id="18" mainText="75" /><node id="19" mainText="23" /><node id="20" mainText="7" /><node id="21" mainText="99" /><node id="22" mainText="84" /><node id="23" mainText="65" /><node id="24" mainText="41" /><node id="25" mainText="49" /><node id="26" mainText="8" /><node id="27" mainText="83" /><node id="28" mainText="9" /><node id="29" mainText="25" /><node id="30" mainText="70" /><node id="31" mainText="26" /><node id="32" mainText="58" /><node id="33" mainText="28" /><node id="34" mainText="74" /><node id="35" mainText="59" /><node id="36" mainText="10" /><node id="37" mainText="66" /><node id="38" mainText="85" /><node id="39" mainText="11" /><node id="40" mainText="98" /><node id="41" mainText="54" /><node id="42" mainText="14" /><node id="43" mainText="12" /><node id="44" mainText="40" /><node id="45" mainText="27" /><node id="46" mainText="13" /><node id="47" mainText="35" /><node id="48" mainText="86" /><node id="49" mainText="30" /><node id="50" mainText="16" /><node id="51" mainText="72" /><node id="52" mainText="53" /><node id="53" mainText="76" /><node id="54" mainText="24" /><node id="55" mainText="17" /><node id="56" mainText="20" /><node id="57" mainText="18" /><node id="58" mainText="19" /><node id="59" mainText="29" /><node id="60" mainText="79" /><node id="61" mainText="68" /><node id="62" mainText="97" /><node id="63" mainText="21" /><node id="64" mainText="91" /><node id="65" mainText="63" /><node id="66" mainText="94" /><node id="67" mainText="78" /><node id="68" mainText="95" /><node id="69" mainText="56" /><node id="70" mainText="33" /><node id="71" mainText="93" /><node id="72" mainText="69" /><node id="73" mainText="32" /><node id="74" mainText="39" /><node id="75" mainText="50" /><node id="76" mainText="31" /><node id="77" mainText="67" /><node id="78" mainText="89" /><node id="79" mainText="77" /><node id="80" mainText="48" /><node id="81" mainText="47" /><node id="82" mainText="80" /><node id="83" mainText="45" /><node id="84" mainText="61" /><node id="85" mainText="42" /><node id="86" mainText="87" /><node id="87" mainText="57" /><node id="88" mainText="44" /><node id="89" mainText="82" /><node id="90" mainText="71" /><node id="91" mainText="73" /><node id="92" mainText="60" /><node id="93" mainText="51" /><node id="94" mainText="92" /><node id="95" mainText="100" /><node id="96" mainText="81" /><node id="97" mainText="88" /><node id="98" mainText="64" /><node id="99" mainText="96" /><edge source="0" target="1" /><edge source="0" target="2" /><edge source="0" target="3" /><edge source="0" target="4" /><edge source="1" target="5" /><edge source="1" target="6" /><edge source="7" target="8" /><edge source="7" target="9" /><edge source="7" target="10" /><edge source="7" target="11" /><edge source="7" target="12" /><edge source="7" target="13" /><edge source="14" target="7" /><edge source="14" target="15" /><edge source="14" target="16" /><edge source="5" target="14" /><edge source="5" target="3" /><edge source="5" target="17" /><edge source="5" target="18" /><edge source="5" target="16" /><edge source="5" target="19" /><edge source="8" target="0" /><edge source="8" target="20" /><edge source="8" target="21" /><edge source="8" target="22" /><edge source="8" target="23" /><edge source="8" target="24" /><edge source="20" target="25" /><edge source="20" target="26" /><edge source="20" target="27" /><edge source="20" target="13" /><edge source="26" target="28" /><edge source="26" target="29" /><edge source="26" target="12" /><edge source="26" target="30" /><edge source="26" target="25" /><edge source="26" target="23" /><edge source="28" target="31" /><edge source="28" target="32" /><edge source="28" target="33" /><edge source="28" target="7" /><edge source="28" target="34" /><edge source="28" target="35" /><edge source="28" target="36" /><edge source="28" target="37" /><edge source="28" target="38" /><edge source="36" target="39" /><edge source="36" target="40" /><edge source="36" target="41" /><edge source="39" target="42" /><edge source="39" target="43" /><edge source="39" target="44" /><edge source="43" target="12" /><edge source="43" target="45" /><edge source="43" target="28" /><edge source="46" target="12" /><edge source="46" target="44" /><edge source="46" target="30" /><edge source="46" target="47" /><edge source="42" target="12" /><edge source="42" target="48" /><edge source="42" target="14" /><edge source="42" target="49" /><edge source="12" target="50" /><edge source="12" target="18" /><edge source="12" target="51" /><edge source="12" target="52" /><edge source="12" target="20" /><edge source="12" target="5" /><edge source="50" target="53" /><edge source="50" target="9" /><edge source="50" target="54" /><edge source="50" target="27" /><edge source="50" target="45" /><edge source="50" target="20" /><edge source="50" target="55" /><edge source="55" target="56" /><edge source="55" target="57" /><edge source="57" target="58" /><edge source="57" target="59" /><edge source="58" target="15" /><edge source="58" target="60" /><edge source="58" target="61" /><edge source="58" target="29" /><edge source="58" target="56" /><edge source="58" target="22" /><edge source="58" target="62" /><edge source="56" target="63" /><edge source="56" target="12" /><edge source="56" target="48" /><edge source="56" target="64" /><edge source="63" target="44" /><edge source="63" target="6" /><edge source="63" target="65" /><edge source="63" target="3" /><edge source="63" target="50" /><edge source="6" target="29" /><edge source="6" target="56" /><edge source="6" target="58" /><edge source="6" target="66" /><edge source="6" target="63" /><edge source="6" target="50" /><edge source="19" target="67" /><edge source="19" target="68" /><edge source="19" target="43" /><edge source="19" target="40" /><edge source="54" target="1" /><edge source="54" target="42" /><edge source="54" target="69" /><edge source="54" target="48" /><edge source="54" target="70" /><edge source="54" target="71" /><edge source="54" target="72" /><edge source="29" target="31" /><edge source="29" target="12" /><edge source="31" target="57" /><edge source="31" target="2" /><edge source="31" target="69" /><edge source="45" target="73" /><edge source="45" target="74" /><edge source="45" target="5" /><edge source="45" target="71" /><edge source="45" target="73" /><edge source="45" target="75" /><edge source="33" target="45" /><edge source="33" target="24" /><edge source="59" target="33" /><edge source="59" target="23" /><edge source="59" target="29" /><edge source="59" target="44" /><edge source="49" target="76" /><edge source="49" target="77" /><edge source="49" target="56" /><edge source="49" target="16" /><edge source="49" target="35" /><edge source="49" target="78" /><edge source="49" target="43" /><edge source="76" target="21" /><edge source="76" target="79" /><edge source="76" target="80" /><edge source="76" target="68" /><edge source="76" target="30" /><edge source="76" target="70" /><edge source="73" target="36" /><edge source="73" target="42" /><edge source="70" target="7" /><edge source="70" target="32" /><edge source="70" target="4" /><edge source="70" target="22" /><edge source="70" target="81" /><edge source="70" target="40" /><edge source="70" target="81" /><edge source="9" target="82" /><edge source="9" target="14" /><edge source="9" target="50" /><edge source="9" target="83" /><edge source="9" target="84" /><edge source="9" target="71" /><edge source="47" target="50" /><edge source="47" target="85" /><edge source="15" target="7" /><edge source="15" target="70" /><edge source="10" target="58" /><edge source="10" target="37" /><edge source="10" target="0" /><edge source="10" target="42" /><edge source="10" target="72" /><edge source="10" target="15" /><edge source="11" target="86" /><edge source="11" target="13" /><edge source="11" target="74" /><edge source="74" target="39" /><edge source="74" target="87" /><edge source="74" target="41" /><edge source="44" target="80" /><edge source="44" target="33" /><edge source="44" target="19" /><edge source="44" target="26" /><edge source="44" target="39" /><edge source="24" target="85" /><edge source="24" target="23" /><edge source="85" target="1" /><edge source="85" target="78" /><edge source="3" target="9" /><edge source="3" target="7" /><edge source="3" target="28" /><edge source="3" target="80" /><edge source="3" target="28" /><edge source="88" target="31" /><edge source="88" target="32" /><edge source="88" target="33" /><edge source="88" target="7" /><edge source="88" target="34" /><edge source="83" target="0" /><edge source="83" target="3" /><edge source="83" target="89" /><edge source="83" target="90" /><edge source="83" target="51" /><edge source="83" target="24" /><edge source="83" target="5" /><edge source="2" target="58" /><edge source="2" target="51" /><edge source="2" target="74" /><edge source="2" target="10" /><edge source="2" target="61" /><edge source="81" target="80" /><edge source="81" target="8" /><edge source="81" target="85" /><edge source="80" target="25" /><edge source="80" target="84" /><edge source="80" target="29" /><edge source="80" target="7" /><edge source="25" target="45" /><edge source="25" target="87" /><edge source="25" target="73" /><edge source="25" target="43" /><edge source="25" target="69" /><edge source="25" target="17" /><edge source="75" target="91" /><edge source="75" target="92" /><edge source="93" target="71" /><edge source="93" target="79" /><edge source="93" target="46" /><edge source="93" target="11" /><edge source="93" target="34" /><edge source="93" target="18" /><edge source="17" target="26" /><edge source="17" target="21" /><edge source="52" target="41" /><edge source="52" target="71" /><edge source="52" target="94" /><edge source="52" target="61" /><edge source="41" target="13" /><edge source="41" target="86" /><edge source="13" target="61" /><edge source="13" target="95" /><edge source="13" target="14" /><edge source="13" target="4" /><edge source="13" target="38" /><edge source="13" target="33" /><edge source="13" target="66" /><edge source="69" target="67" /><edge source="69" target="44" /><edge source="69" target="79" /><edge source="69" target="96" /><edge source="69" target="97" /><edge source="69" target="53" /><edge source="87" target="98" /><edge source="87" target="11" /><edge source="87" target="83" /><edge source="87" target="46" /><edge source="87" target="36" /><edge source="87" target="7" /><edge source="87" target="0" /><edge source="32" target="85" /><edge source="32" target="23" /><edge source="32" target="31" /><edge source="32" target="52" /><edge source="32" target="2" /><edge source="32" target="80" /><edge source="32" target="5" /><edge source="32" target="45" /><edge source="35" target="92" /><edge source="35" target="77" /><edge source="35" target="38" /><edge source="92" target="11" /><edge source="92" target="80" /><edge source="92" target="90" /><edge source="92" target="57" /><edge source="92" target="32" /><edge source="84" target="52" /><edge source="84" target="57" /><edge source="84" target="71" /><edge source="84" target="8" /><edge source="84" target="4" /><edge source="84" target="8" /><edge source="84" target="91" /><edge source="4" target="65" /><edge source="4" target="21" /><edge source="4" target="34" /><edge source="65" target="0" /><edge source="65" target="87" /><edge source="65" target="70" /><edge source="65" target="97" /><edge source="98" target="20" /><edge source="98" target="97" /><edge source="98" target="59" /><edge source="23" target="37" /><edge source="23" target="75" /><edge source="23" target="82" /><edge source="23" target="79" /><edge source="37" target="60" /><edge source="37" target="29" /><edge source="37" target="35" /><edge source="37" target="35" /><edge source="37" target="87" /><edge source="37" target="82" /><edge source="37" target="26" /><edge source="77" target="61" /><edge source="77" target="52" /><edge source="77" target="83" /><edge source="77" target="75" /><edge source="77" target="62" /><edge source="61" target="24" /><edge source="61" target="9" /><edge source="61" target="11" /><edge source="61" target="72" /><edge source="72" target="43" /><edge source="72" target="18" /><edge source="72" target="96" /><edge source="72" target="17" /><edge source="72" target="65" /><edge source="72" target="58" /><edge source="30" target="54" /><edge source="30" target="85" /><edge source="30" target="1" /><edge source="30" target="92" /><edge source="30" target="37" /><edge source="90" target="75" /><edge source="90" target="49" /><edge source="90" target="92" /><edge source="90" target="15" /><edge source="51" target="91" /><edge source="51" target="93" /><edge source="91" target="30" /><edge source="91" target="31" /><edge source="91" target="66" /><edge source="91" target="58" /><edge source="91" target="62" /><edge source="34" target="19" /><edge source="34" target="76" /><edge source="18" target="27" /><edge source="18" target="47" /><edge source="18" target="86" /><edge source="18" target="87" /><edge source="53" target="60" /><edge source="53" target="99" /><edge source="53" target="1" /><edge source="53" target="19" /><edge source="53" target="80" /><edge source="53" target="13" /><edge source="79" target="91" /><edge source="79" target="85" /><edge source="79" target="51" /><edge source="79" target="37" /><edge source="67" target="60" /><edge source="67" target="52" /><edge source="67" target="88" /><edge source="67" target="64" /><edge source="60" target="72" /><edge source="60" target="27" /><edge source="60" target="54" /><edge source="60" target="86" /><edge source="60" target="92" /><edge source="60" target="7" /><edge source="60" target="1" /><edge source="82" target="96" /><edge source="82" target="50" /><edge source="96" target="83" /><edge source="96" target="94" /><edge source="96" target="9" /><edge source="96" target="57" /><edge source="96" target="31" /><edge source="96" target="57" /><edge source="96" target="73" /><edge source="89" target="82" /><edge source="89" target="60" /><edge source="89" target="1" /><edge source="89" target="79" /><edge source="27" target="8" /><edge source="27" target="80" /><edge source="27" target="91" /><edge source="27" target="71" /><edge source="27" target="63" /><edge source="22" target="31" /><edge source="22" target="29" /><edge source="22" target="56" /><edge source="22" target="74" /><edge source="22" target="56" /><edge source="22" target="33" /><edge source="38" target="41" /><edge source="38" target="7" /><edge source="38" target="29" /><edge source="38" target="94" /><edge source="48" target="41" /><edge source="48" target="8" /><edge source="48" target="37" /><edge source="86" target="84" /><edge source="86" target="82" /><edge source="86" target="97" /><edge source="86" target="20" /><edge source="86" target="87" /><edge source="97" target="53" /><edge source="97" target="19" /><edge source="97" target="68" /><edge source="97" target="16" /><edge source="97" target="53" /><edge source="97" target="86" /><edge source="97" target="99" /><edge source="78" target="34" /><edge source="78" target="29" /><edge source="78" target="58" /><edge source="78" target="99" /><edge source="16" target="33" /><edge source="16" target="35" /><edge source="16" target="84" /><edge source="16" target="52" /><edge source="16" target="2" /><edge source="16" target="14" /><edge source="64" target="51" /><edge source="64" target="98" /><edge source="94" target="77" /><edge source="94" target="43" /><edge source="94" target="67" /><edge source="94" target="31" /><edge source="94" target="53" /><edge source="94" target="30" /><edge source="94" target="28" /><edge source="71" target="95" /><edge source="71" target="76" /><edge source="71" target="81" /><edge source="71" target="44" /><edge source="71" target="94" /><edge source="71" target="91" /><edge source="66" target="59" /><edge source="66" target="57" /><edge source="66" target="45" /><edge source="66" target="93" /><edge source="66" target="85" /><edge source="66" target="64" /><edge source="66" target="85" /><edge source="68" target="78" /><edge source="68" target="4" /><edge source="68" target="61" /><edge source="68" target="99" /><edge source="68" target="60" /><edge source="99" target="62" /><edge source="99" target="83" /><edge source="99" target="63" /><edge source="99" target="63" /><edge source="99" target="28" /><edge source="62" target="73" /><edge source="62" target="89" /><edge source="40" target="17" /><edge source="40" target="74" /><edge source="21" target="60" /><edge source="21" target="57" /><edge source="21" target="29" /><edge source="21" target="57" /><edge source="21" target="81" /><edge source="21" target="15" /><edge source="21" target="10" /><edge source="21" target="20" /><edge source="95" target="80" /><edge source="95" target="33" /><edge source="95" target="55" /><edge source="95" target="25" /><edge source="95" target="72" /><edge source="38" target="51" /></graph></graphml>`;
-
+    // Глобальные переменные
     let adjacency = {};
     let idToLabel = {};
     let labelToId = {};
+    let visualData = {}; // Здесь будут храниться схемы каждой степи
+    let currentPathText = "";
 
+    // 1. Парсинг графа (связи)
     function parseGraph() {
         const parser = new DOMParser();
         const xmlDoc = parser.parseFromString(rawGraphXML, "text/xml");
+        
         const nodes = xmlDoc.getElementsByTagName("node");
         for (let i = 0; i < nodes.length; i++) {
             const id = nodes[i].getAttribute("id");
             const label = nodes[i].getAttribute("mainText");
             if (id && label) { idToLabel[id] = label; labelToId[label] = id; }
         }
+
         const edges = xmlDoc.getElementsByTagName("edge");
         for (let i = 0; i < edges.length; i++) {
             const source = edges[i].getAttribute("source");
@@ -174,210 +218,1027 @@
         }
     }
 
-    // --- ЛОГИКА ИНТЕРФЕЙСА ---
+    // 2. Парсинг Визуализации (ББ-кодов)
+    function parseVisuals() {
+        // Регулярка ищет блоки: [block=Меню1:НОМЕР]...содержимое...[/block]
+        const blockRegex = /\[block=Меню1:(\d+)\]([\s\S]*?)\[\/block\]/g;
+        let match;
 
-    function addWaypoint() {
-        const container = document.getElementById("waypointsContainer");
-        const div = document.createElement("div");
-        div.className = "waypoint-row";
-        div.innerHTML = `
-            <input type="text" class="waypoint-input" placeholder="Заехать в...">
-            <button class="remove-btn" onclick="this.parentElement.remove()">×</button>
-        `;
-        container.appendChild(div);
+        while ((match = blockRegex.exec(rawBBCodeVisuals)) !== null) {
+            const nodeLabel = match[1]; // Номер степи (например, "1")
+            const content = match[2].trim();
+            
+            // Разбиваем на строки, чтобы получить сетку
+            // Фильтруем пустые строки
+            const lines = content.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+            
+            // Пропускаем первую строку если там просто цифра (заголовок в бб коде)
+            let gridLines = lines;
+            if (lines[0] && /^\d+$/.test(lines[0])) {
+                gridLines = lines.slice(1);
+            }
+
+            // Создаем структуру сетки: массив объектов { target: "46" или null }
+            let gridCells = [];
+            
+            gridLines.forEach(line => {
+                // Ищем "клетки" в строке. 
+                // Белый квадрат = пусто
+                // [header=Меню2:XY]... = выход на XY
+                
+                // Это сложный момент, так как BB-код смешивает текст и теги.
+                // Мы используем хитрый сплит или регулярку для поиска переходов.
+                
+                // Простейший парсер строки:
+                // Мы предполагаем, что структура 10 символов в ширину (примерно)
+                // Но проще искать все вхождения header в строке и их позиции, 
+                // либо просто считать, что каждый [header...] или ⬜ - это ячейка.
+                
+                // Упрощение: разбиваем строку по символам квадратов, учитывая что header оборачивает квадрат
+                
+                // Временный заменитель для парсинга
+                let tempLine = line;
+                
+                // Находим все переходы
+                const exits = [];
+                const headerRegex = /\[header=Меню[1-3]:(\d+)\](.*?)\[\/header\]/g;
+                let hMatch;
+                while ((hMatch = headerRegex.exec(line)) !== null) {
+                    exits.push({ target: hMatch[1], index: hMatch.index });
+                }
+
+                // В реальности визуализация в HTML Grid требует просто списка ячеек.
+                // Мы пойдем простым путем: превратим строку в массив ячеек.
+                
+                // Заменяем сложные теги на спец-символы для сплита
+                // [header=...:XX]...[/header] -> E(XX)
+                let simplified = line.replace(/\[header=Меню[1-3]:(\d+)\].*?\[\/header\]/g, "E($1)");
+                // Убираем всё лишнее кроме квадратов и E(XX)
+                // Внимание: символы квадратов могут быть разными.
+                
+                // Проходимся по упрощенной строке
+                // E(46) - выход на 46
+                // ⬜ - пусто
+                // ⬛ - просто черный (без ссылки? вряд ли, обычно это выход)
+                
+                // Разбиваем по условным единицам.
+                // Так как это Grid, нам нужно просто 10 ячеек на строку.
+                // Регулярка ловит либо E(\d+), либо один любой символ (квадрат)
+                const tokens = simplified.match(/E\(\d+\)|./g) || [];
+                
+                tokens.forEach(token => {
+                    if (token.startsWith("E(")) {
+                        const target = token.match(/\d+/)[0];
+                        gridCells.push({ type: 'exit', target: target });
+                    } else if (token === '⬜' || token === '⬛') {
+                        // Если черный квадрат остался без header, это странно, но пусть будет exit без цели (или декор)
+                         gridCells.push({ type: 'empty', target: null });
+                    } else {
+                         // Пробелы и мусор игнорируем, если они не ломают сетку 10х6
+                    }
+                });
+            });
+
+            // Сохраняем данные для степи
+            visualData[nodeLabel] = gridCells;
+        }
     }
 
-    function swapInputs() {
-        const start = document.getElementById("startNode");
-        const end = document.getElementById("endNode");
-        [start.value, end.value] = [end.value, start.value];
-    }
-
-    // --- ЛОГИКА ПОИСКА ---
-
+    // 3. Основная логика
     function calculateRoute() {
         const startLabel = document.getElementById("startNode").value.trim();
         const endLabel = document.getElementById("endNode").value.trim();
         const resultDiv = document.getElementById("result");
+        const copyBtn = document.getElementById("copyBtn");
+        
         resultDiv.innerHTML = "";
+        copyBtn.style.display = "none";
 
-        // Сбор промежуточных точек
-        const waypointInputs = document.querySelectorAll(".waypoint-input");
-        let waypoints = [];
-        for (let input of waypointInputs) {
-            const val = input.value.trim();
-            if (val) waypoints.push(val);
-        }
-
-        // Проверка на валидность
         if (!labelToId[startLabel] || !labelToId[endLabel]) {
-            resultDiv.innerHTML = `<span class="error">Ошибка: Проверьте номера старта и финиша.</span>`;
+            resultDiv.innerHTML = `<div class="error">Ошибка: Неверный номер степи.</div>`;
             return;
-        }
-        for (let wp of waypoints) {
-            if (!labelToId[wp]) {
-                resultDiv.innerHTML = `<span class="error">Ошибка: Степь "${wp}" не найдена.</span>`;
-                return;
-            }
         }
 
         const startId = labelToId[startLabel];
         const endId = labelToId[endLabel];
-        const waypointIds = waypoints.map(w => labelToId[w]);
 
-        // СЦЕНАРИЙ 1: Просто старт -> финиш (ищем альтернативы)
-        if (waypointIds.length === 0) {
-            const allPaths = findAllShortestPaths(startId, endId);
-            if (allPaths.length === 0) {
-                resultDiv.innerHTML = `<span class="error">Пути нет.</span>`;
-            } else {
-                displayPaths(allPaths, resultDiv);
-            }
-        } 
-        // СЦЕНАРИЙ 2: Есть промежуточные точки (задача коммивояжера)
-        else {
-            findOptimizedRoute(startId, endId, waypointIds, resultDiv);
-        }
-    }
-
-    // --- АЛГОРИТМЫ ---
-
-    // 1. Поиск ВСЕХ кратчайших путей (BFS с восстановлением родителей)
-    function findAllShortestPaths(start, end) {
-        let queue = [start];
-        let dist = { [start]: 0 };
-        let parents = { [start]: [] };
+        // BFS поиск пути
+        let queue = [[startId, [startId]]];
+        let visited = new Set([startId]);
+        let path = null;
 
         while (queue.length > 0) {
-            let curr = queue.shift();
-            if (curr === end) continue; // Не останавливаемся, чтобы найти другие пути той же длины
-
-            const neighbors = adjacency[curr] || [];
-            for (let neighbor of neighbors) {
-                if (dist[neighbor] === undefined) {
-                    dist[neighbor] = dist[curr] + 1;
-                    parents[neighbor] = [curr];
-                    queue.push(neighbor);
-                } else if (dist[neighbor] === dist[curr] + 1) {
-                    parents[neighbor].push(curr);
-                }
-            }
-        }
-
-        if (dist[end] === undefined) return [];
-
-        // Рекурсивно восстанавливаем пути
-        let resultPaths = [];
-        function buildPaths(current, path) {
-            if (current === start) {
-                resultPaths.push([start, ...path]);
-                return;
-            }
-            for (let p of parents[current] || []) {
-                buildPaths(p, [current, ...path]);
-            }
-        }
-        buildPaths(end, []);
-        return resultPaths;
-    }
-
-    // 2. Поиск оптимального порядка точек (Перестановки)
-    function findOptimizedRoute(start, end, waypoints, container) {
-        // Генерируем все варианты порядка точек
-        const perms = permutator(waypoints);
-        let bestPath = null;
-        let minLength = Infinity;
-        let bestOrderLabel = "";
-
-        // Перебираем варианты (например: А->Б->В или Б->А->В)
-        for (let perm of perms) {
-            let fullPath = [];
-            let currentLen = 0;
-            let currentPos = start;
-            let possible = true;
-
-            // Строим путь: Старт -> Точка1 -> Точка2 -> ... -> Финиш
-            const sequence = [...perm, end];
-
-            for (let nextTarget of sequence) {
-                // Ищем путь только для сегмента (здесь берем первый попавшийся кратчайший)
-                const paths = findAllShortestPaths(currentPos, nextTarget);
-                if (paths.length === 0) {
-                    possible = false;
-                    break;
-                }
-                // Берем первый путь, но убираем дублирование узла стыка
-                const segment = paths[0]; 
-                if (fullPath.length > 0) {
-                    fullPath.push(...segment.slice(1));
-                } else {
-                    fullPath.push(...segment);
-                }
-                currentLen += (segment.length - 1);
-                currentPos = nextTarget;
-            }
-
-            if (possible && currentLen < minLength) {
-                minLength = currentLen;
-                bestPath = fullPath;
-                bestOrderLabel = perm.map(id => idToLabel[id]).join(" → ");
-            }
-        }
-
-        if (bestPath) {
-            let html = `<div class="path-block">
-                <span class="path-title">⚡ Оптимальный маршрут (${minLength} шагов)</span>
-                <div class="info">Лучший порядок посещения: ${bestOrderLabel}</div>
-                <div class="path-text">${bestPath.map(id => idToLabel[id]).join(" → ")}</div>
-            </div>`;
-            container.innerHTML = html;
-        } else {
-            container.innerHTML = `<span class="error">Невозможно построить маршрут через все указанные точки.</span>`;
-        }
-    }
-
-    // Вспомогательная функция для генерации перестановок
-    function permutator(inputArr) {
-        let result = [];
-        const permute = (arr, m = []) => {
-            if (arr.length === 0) {
-                result.push(m);
-            } else {
-                for (let i = 0; i < arr.length; i++) {
-                    let curr = arr.slice();
-                    let next = curr.splice(i, 1);
-                    permute(curr.slice(), m.concat(next));
-                }
-            }
-        }
-        permute(inputArr);
-        return result;
-    }
-
-    function displayPaths(paths, container) {
-        // Сортируем просто для порядка
-        let html = "";
-        paths.forEach((path, index) => {
-            const pathStr = path.map(id => idToLabel[id]).join(" → ");
-            const steps = path.length - 1;
+            const [curr, p] = queue.shift();
+            if (curr === endId) { path = p; break; }
             
-            if (index === 0) {
-                html += `<div class="path-block">
-                            <span class="path-title">🚀 Основной маршрут (${steps} шагов)</span>
-                            <div class="path-text">${pathStr}</div>
-                         </div>`;
-            } else {
-                html += `<div class="path-block">
-                            <span class="alt-title">🔄 Альтернатива ${index} (тоже ${steps} шагов)</span>
-                            <div class="path-text">${pathStr}</div>
-                         </div>`;
+            const neighbors = adjacency[curr] || [];
+            for (let n of neighbors) {
+                if (!visited.has(n)) {
+                    visited.add(n);
+                    queue.push([n, [...p, n]]);
+                }
+            }
+        }
+
+        if (!path) {
+            resultDiv.innerHTML = `<div class="error">Маршрут не найден.</div>`;
+            return;
+        }
+
+        // Отрисовка маршрута
+        renderPathVisuals(path, resultDiv);
+        
+        // Текст для копирования
+        currentPathText = path.map(id => idToLabel[id]).join(" → ");
+        copyBtn.style.display = "block";
+    }
+
+    function renderPathVisuals(pathIds, container) {
+        pathIds.forEach((nodeId, index) => {
+            const label = idToLabel[nodeId];
+            const nextNodeId = pathIds[index + 1]; // Куда идем дальше
+            const nextLabel = nextNodeId ? idToLabel[nextNodeId] : null;
+
+            // Создаем блок степи
+            const stepDiv = document.createElement("div");
+            stepDiv.className = "step-container";
+            
+            // Заголовок (Степь X)
+            const title = document.createElement("div");
+            title.className = "step-title";
+            title.innerText = `Степь ${label}`;
+            stepDiv.appendChild(title);
+
+            // Сетка
+            const gridDiv = document.createElement("div");
+            gridDiv.className = "steppe-grid";
+
+            // Получаем данные ячеек (по умолчанию пустые, если парсинг не нашел)
+            const cells = visualData[label] || Array(60).fill({ type: 'empty' });
+
+            cells.forEach(cellData => {
+                const cell = document.createElement("div");
+                cell.className = "cell";
+                
+                if (cellData.type === 'exit') {
+                    cell.classList.add("exit");
+                    cell.title = `Переход в ${cellData.target}`;
+                    
+                    // ЕСЛИ этот выход ведет туда, куда нам надо - ПОДСВЕЧИВАЕМ
+                    if (nextLabel && cellData.target === nextLabel) {
+                        cell.classList.add("active-path");
+                    }
+                }
+                gridDiv.appendChild(cell);
+            });
+
+            stepDiv.appendChild(gridDiv);
+            container.appendChild(stepDiv);
+
+            // Стрелочка вниз, если это не последний элемент
+            if (index < pathIds.length - 1) {
+                const arrow = document.createElement("div");
+                arrow.className = "arrow-down";
+                arrow.innerHTML = "⬇";
+                container.appendChild(arrow);
             }
         });
-        container.innerHTML = html;
     }
 
-    // Запуск
-    parseGraph();
+    function swapInputs() {
+        const s = document.getElementById("startNode");
+        const e = document.getElementById("endNode");
+        [s.value, e.value] = [e.value, s.value];
+    }
+
+    function copyRoute() {
+        navigator.clipboard.writeText(currentPathText);
+        alert("Маршрут скопирован!");
+    }
+
+</script>
+
+        // === ДАННЫЕ ГРАФА ===
+    const rawGraphXML = `<?xml version="1.0" encoding="UTF-8"?><graphml><graph id="Graph" uidGraph="100" uidEdge="11378">
+    <node id="0" mainText="1" /><node id="1" mainText="2" /><node id="2" mainText="46" /><node id="3" mainText="43" /><node id="4" mainText="62" /><node id="5" mainText="5" /><node id="6" mainText="22" /><node id="7" mainText="3" /><node id="8" mainText="6" /><node id="9" mainText="34" /><node id="10" mainText="37" /><node id="11" mainText="38" /><node id="12" mainText="15" /><node id="13" mainText="55" /><node id="14" mainText="4" /><node id="15" mainText="36" /><node id="16" mainText="90" /><node id="17" mainText="52" /><node id="18" mainText="75" /><node id="19" mainText="23" /><node id="20" mainText="7" /><node id="21" mainText="99" /><node id="22" mainText="84" /><node id="23" mainText="65" /><node id="24" mainText="41" /><node id="25" mainText="49" /><node id="26" mainText="8" /><node id="27" mainText="83" /><node id="28" mainText="9" /><node id="29" mainText="25" /><node id="30" mainText="70" /><node id="31" mainText="26" /><node id="32" mainText="58" /><node id="33" mainText="28" /><node id="34" mainText="74" /><node id="35" mainText="59" /><node id="36" mainText="10" /><node id="37" mainText="66" /><node id="38" mainText="85" /><node id="39" mainText="11" /><node id="40" mainText="98" /><node id="41" mainText="54" /><node id="42" mainText="14" /><node id="43" mainText="12" /><node id="44" mainText="40" /><node id="45" mainText="27" /><node id="46" mainText="13" /><node id="47" mainText="35" /><node id="48" mainText="86" /><node id="49" mainText="30" /><node id="50" mainText="16" /><node id="51" mainText="72" /><node id="52" mainText="53" /><node id="53" mainText="76" /><node id="54" mainText="24" /><node id="55" mainText="17" /><node id="56" mainText="20" /><node id="57" mainText="18" /><node id="58" mainText="19" /><node id="59" mainText="29" /><node id="60" mainText="79" /><node id="61" mainText="68" /><node id="62" mainText="97" /><node id="63" mainText="21" /><node id="64" mainText="91" /><node id="65" mainText="63" /><node id="66" mainText="94" /><node id="67" mainText="78" /><node id="68" mainText="95" /><node id="69" mainText="56" /><node id="70" mainText="33" /><node id="71" mainText="93" /><node id="72" mainText="69" /><node id="73" mainText="32" /><node id="74" mainText="39" /><node id="75" mainText="50" /><node id="76" mainText="31" /><node id="77" mainText="67" /><node id="78" mainText="89" /><node id="79" mainText="77" /><node id="80" mainText="48" /><node id="81" mainText="47" /><node id="82" mainText="80" /><node id="83" mainText="45" /><node id="84" mainText="61" /><node id="85" mainText="42" /><node id="86" mainText="87" /><node id="87" mainText="57" /><node id="88" mainText="44" /><node id="89" mainText="82" /><node id="90" mainText="71" /><node id="91" mainText="73" /><node id="92" mainText="60" /><node id="93" mainText="51" /><node id="94" mainText="92" /><node id="95" mainText="100" /><node id="96" mainText="81" /><node id="97" mainText="88" /><node id="98" mainText="64" /><node id="99" mainText="96" />
+    <edge source="0" target="1" /><edge source="0" target="2" /><edge source="0" target="3" /><edge source="0" target="4" /><edge source="1" target="5" /><edge source="1" target="6" /><edge source="7" target="8" /><edge source="7" target="9" /><edge source="7" target="10" /><edge source="7" target="11" /><edge source="7" target="12" /><edge source="7" target="13" /><edge source="14" target="7" /><edge source="14" target="15" /><edge source="14" target="16" /><edge source="5" target="14" /><edge source="5" target="3" /><edge source="5" target="17" /><edge source="5" target="18" /><edge source="5" target="16" /><edge source="5" target="19" /><edge source="8" target="0" /><edge source="8" target="20" /><edge source="8" target="21" /><edge source="8" target="22" /><edge source="8" target="23" /><edge source="8" target="24" /><edge source="20" target="25" /><edge source="20" target="26" /><edge source="20" target="27" /><edge source="20" target="13" /><edge source="26" target="28" /><edge source="26" target="29" /><edge source="26" target="12" /><edge source="26" target="30" /><edge source="26" target="25" /><edge source="26" target="23" /><edge source="28" target="31" /><edge source="28" target="32" /><edge source="28" target="33" /><edge source="28" target="7" /><edge source="28" target="34" /><edge source="28" target="35" /><edge source="28" target="36" /><edge source="28" target="37" /><edge source="28" target="38" /><edge source="36" target="39" /><edge source="36" target="40" /><edge source="36" target="41" /><edge source="39" target="42" /><edge source="39" target="43" /><edge source="39" target="44" /><edge source="43" target="12" /><edge source="43" target="45" /><edge source="43" target="28" /><edge source="46" target="12" /><edge source="46" target="44" /><edge source="46" target="30" /><edge source="46" target="47" /><edge source="42" target="12" /><edge source="42" target="48" /><edge source="42" target="14" /><edge source="42" target="49" /><edge source="12" target="50" /><edge source="12" target="18" /><edge source="12" target="51" /><edge source="12" target="52" /><edge source="12" target="20" /><edge source="12" target="5" /><edge source="50" target="53" /><edge source="50" target="9" /><edge source="50" target="54" /><edge source="50" target="27" /><edge source="50" target="45" /><edge source="50" target="20" /><edge source="50" target="55" /><edge source="55" target="56" /><edge source="55" target="57" /><edge source="57" target="58" /><edge source="57" target="59" /><edge source="58" target="15" /><edge source="58" target="60" /><edge source="58" target="61" /><edge source="58" target="29" /><edge source="58" target="56" /><edge source="58" target="22" /><edge source="58" target="62" /><edge source="56" target="63" /><edge source="56" target="12" /><edge source="56" target="48" /><edge source="56" target="64" /><edge source="63" target="44" /><edge source="63" target="6" /><edge source="63" target="65" /><edge source="63" target="3" /><edge source="63" target="50" /><edge source="6" target="29" /><edge source="6" target="56" /><edge source="6" target="58" /><edge source="6" target="66" /><edge source="6" target="63" /><edge source="6" target="50" /><edge source="19" target="67" /><edge source="19" target="68" /><edge source="19" target="43" /><edge source="19" target="40" /><edge source="54" target="1" /><edge source="54" target="42" /><edge source="54" target="69" /><edge source="54" target="48" /><edge source="54" target="70" /><edge source="54" target="71" /><edge source="54" target="72" /><edge source="29" target="31" /><edge source="29" target="12" /><edge source="31" target="57" /><edge source="31" target="2" /><edge source="31" target="69" /><edge source="45" target="73" /><edge source="45" target="74" /><edge source="45" target="5" /><edge source="45" target="71" /><edge source="45" target="73" /><edge source="45" target="75" /><edge source="33" target="45" /><edge source="33" target="24" /><edge source="59" target="33" /><edge source="59" target="23" /><edge source="59" target="29" /><edge source="59" target="44" /><edge source="49" target="76" /><edge source="49" target="77" /><edge source="49" target="56" /><edge source="49" target="16" /><edge source="49" target="35" /><edge source="49" target="78" /><edge source="49" target="43" /><edge source="76" target="21" /><edge source="76" target="79" /><edge source="76" target="80" /><edge source="76" target="68" /><edge source="76" target="30" /><edge source="76" target="70" /><edge source="73" target="36" /><edge source="73" target="42" /><edge source="70" target="7" /><edge source="70" target="32" /><edge source="70" target="4" /><edge source="70" target="22" /><edge source="70" target="81" /><edge source="70" target="40" /><edge source="70" target="81" /><edge source="9" target="82" /><edge source="9" target="14" /><edge source="9" target="50" /><edge source="9" target="83" /><edge source="9" target="84" /><edge source="9" target="71" /><edge source="47" target="50" /><edge source="47" target="85" /><edge source="15" target="7" /><edge source="15" target="70" /><edge source="10" target="58" /><edge source="10" target="37" /><edge source="10" target="0" /><edge source="10" target="42" /><edge source="10" target="72" /><edge source="10" target="15" /><edge source="11" target="86" /><edge source="11" target="13" /><edge source="11" target="74" /><edge source="74" target="39" /><edge source="74" target="87" /><edge source="74" target="41" /><edge source="44" target="80" /><edge source="44" target="33" /><edge source="44" target="19" /><edge source="44" target="26" /><edge source="44" target="39" /><edge source="24" target="85" /><edge source="24" target="23" /><edge source="85" target="1" /><edge source="85" target="78" /><edge source="3" target="9" /><edge source="3" target="7" /><edge source="3" target="28" /><edge source="3" target="80" /><edge source="3" target="28" /><edge source="88" target="31" /><edge source="88" target="32" /><edge source="88" target="33" /><edge source="88" target="7" /><edge source="88" target="34" /><edge source="83" target="0" /><edge source="83" target="3" /><edge source="83" target="89" /><edge source="83" target="90" /><edge source="83" target="51" /><edge source="83" target="24" /><edge source="83" target="5" /><edge source="2" target="58" /><edge source="2" target="51" /><edge source="2" target="74" /><edge source="2" target="10" /><edge source="2" target="61" /><edge source="81" target="80" /><edge source="81" target="8" /><edge source="81" target="85" /><edge source="80" target="25" /><edge source="80" target="84" /><edge source="80" target="29" /><edge source="80" target="7" /><edge source="25" target="45" /><edge source="25" target="87" /><edge source="25" target="73" /><edge source="25" target="43" /><edge source="25" target="69" /><edge source="25" target="17" /><edge source="75" target="91" /><edge source="75" target="92" /><edge source="93" target="71" /><edge source="93" target="79" /><edge source="93" target="46" /><edge source="93" target="11" /><edge source="93" target="34" /><edge source="93" target="18" /><edge source="17" target="26" /><edge source="17" target="21" /><edge source="52" target="41" /><edge source="52" target="71" /><edge source="52" target="94" /><edge source="52" target="61" /><edge source="41" target="13" /><edge source="41" target="86" /><edge source="13" target="61" /><edge source="13" target="95" /><edge source="13" target="14" /><edge source="13" target="4" /><edge source="13" target="38" /><edge source="13" target="33" /><edge source="13" target="66" /><edge source="69" target="67" /><edge source="69" target="44" /><edge source="69" target="79" /><edge source="69" target="96" /><edge source="69" target="97" /><edge source="69" target="53" /><edge source="87" target="98" /><edge source="87" target="11" /><edge source="87" target="83" /><edge source="87" target="46" /><edge source="87" target="36" /><edge source="87" target="7" /><edge source="87" target="0" /><edge source="32" target="85" /><edge source="32" target="23" /><edge source="32" target="31" /><edge source="32" target="52" /><edge source="32" target="2" /><edge source="32" target="80" /><edge source="32" target="5" /><edge source="32" target="45" /><edge source="35" target="92" /><edge source="35" target="77" /><edge source="35" target="38" /><edge source="92" target="11" /><edge source="92" target="80" /><edge source="92" target="90" /><edge source="92" target="57" /><edge source="92" target="32" /><edge source="84" target="52" /><edge source="84" target="57" /><edge source="84" target="71" /><edge source="84" target="8" /><edge source="84" target="4" /><edge source="84" target="8" /><edge source="84" target="91" /><edge source="4" target="65" /><edge source="4" target="21" /><edge source="4" target="34" /><edge source="65" target="0" /><edge source="65" target="87" /><edge source="65" target="70" /><edge source="65" target="97" /><edge source="98" target="20" /><edge source="98" target="97" /><edge source="98" target="59" /><edge source="23" target="37" /><edge source="23" target="75" /><edge source="23" target="82" /><edge source="23" target="79" /><edge source="37" target="60" /><edge source="37" target="29" /><edge source="37" target="35" /><edge source="37" target="35" /><edge source="37" target="87" /><edge source="37" target="82" /><edge source="37" target="26" /><edge source="77" target="61" /><edge source="77" target="52" /><edge source="77" target="83" /><edge source="77" target="75" /><edge source="77" target="62" /><edge source="61" target="24" /><edge source="61" target="9" /><edge source="61" target="11" /><edge source="61" target="72" /><edge source="72" target="43" /><edge source="72" target="18" /><edge source="72" target="96" /><edge source="72" target="17" /><edge source="72" target="65" /><edge source="72" target="58" /><edge source="30" target="54" /><edge source="30" target="85" /><edge source="30" target="1" /><edge source="30" target="92" /><edge source="30" target="37" /><edge source="90" target="75" /><edge source="90" target="49" /><edge source="90" target="92" /><edge source="90" target="15" /><edge source="51" target="91" /><edge source="51" target="93" /><edge source="91" target="30" /><edge source="91" target="31" /><edge source="91" target="66" /><edge source="91" target="58" /><edge source="91" target="62" /><edge source="34" target="19" /><edge source="34" target="76" /><edge source="18" target="27" /><edge source="18" target="47" /><edge source="18" target="86" /><edge source="18" target="87" /><edge source="53" target="60" /><edge source="53" target="99" /><edge source="53" target="1" /><edge source="53" target="19" /><edge source="53" target="80" /><edge source="53" target="13" /><edge source="79" target="91" /><edge source="79" target="85" /><edge source="79" target="51" /><edge source="79" target="37" /><edge source="67" target="60" /><edge source="67" target="52" /><edge source="67" target="88" /><edge source="67" target="64" /><edge source="60" target="72" /><edge source="60" target="27" /><edge source="60" target="54" /><edge source="60" target="86" /><edge source="60" target="92" /><edge source="60" target="7" /><edge source="60" target="1" /><edge source="82" target="96" /><edge source="82" target="50" /><edge source="96" target="83" /><edge source="96" target="94" /><edge source="96" target="9" /><edge source="96" target="57" /><edge source="96" target="31" /><edge source="96" target="57" /><edge source="96" target="73" /><edge source="89" target="82" /><edge source="89" target="60" /><edge source="89" target="1" /><edge source="89" target="79" /><edge source="27" target="8" /><edge source="27" target="80" /><edge source="27" target="91" /><edge source="27" target="71" /><edge source="27" target="63" /><edge source="22" target="31" /><edge source="22" target="29" /><edge source="22" target="56" /><edge source="22" target="74" /><edge source="22" target="56" /><edge source="22" target="33" /><edge source="38" target="41" /><edge source="38" target="7" /><edge source="38" target="29" /><edge source="38" target="94" /><edge source="48" target="41" /><edge source="48" target="8" /><edge source="48" target="37" /><edge source="86" target="84" /><edge source="86" target="82" /><edge source="86" target="97" /><edge source="86" target="20" /><edge source="86" target="87" /><edge source="97" target="53" /><edge source="97" target="19" /><edge source="97" target="68" /><edge source="97" target="16" /><edge source="97" target="53" /><edge source="97" target="86" /><edge source="97" target="99" /><edge source="78" target="34" /><edge source="78" target="29" /><edge source="78" target="58" /><edge source="78" target="99" /><edge source="16" target="33" /><edge source="16" target="35" /><edge source="16" target="84" /><edge source="16" target="52" /><edge source="16" target="2" /><edge source="16" target="14" /><edge source="64" target="51" /><edge source="64" target="98" /><edge source="94" target="77" /><edge source="94" target="43" /><edge source="94" target="67" /><edge source="94" target="31" /><edge source="94" target="53" /><edge source="94" target="30" /><edge source="94" target="28" /><edge source="71" target="95" /><edge source="71" target="76" /><edge source="71" target="81" /><edge source="71" target="44" /><edge source="71" target="94" /><edge source="71" target="91" /><edge source="66" target="59" /><edge source="66" target="57" /><edge source="66" target="45" /><edge source="66" target="93" /><edge source="66" target="85" /><edge source="66" target="64" /><edge source="66" target="85" /><edge source="68" target="78" /><edge source="68" target="4" /><edge source="68" target="61" /><edge source="68" target="99" /><edge source="68" target="60" /><edge source="99" target="62" /><edge source="99" target="83" /><edge source="99" target="63" /><edge source="99" target="63" /><edge source="99" target="28" /><edge source="62" target="73" /><edge source="62" target="89" /><edge source="40" target="17" /><edge source="40" target="74" /><edge source="21" target="60" /><edge source="21" target="57" /><edge source="21" target="29" /><edge source="21" target="57" /><edge source="21" target="81" /><edge source="21" target="15" /><edge source="21" target="10" /><edge source="21" target="20" /><edge source="95" target="80" /><edge source="95" target="33" /><edge source="95" target="55" /><edge source="95" target="25" /><edge source="95" target="72" /><edge source="38" target="51" /></graph></graphml>`;
+
+            // === ВИЗУАЛИЗАЦИЯ (ЧАСТЬ 1) ===
+    let rawBBCodeVisuals = `
+[block=Меню1:1]
+⬛⬜⬜⬜⬜⬜⬜[header=Меню2:2]⬛[/header]⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜[header=Меню2:46]⬛[/header]⬜
+⬜⬜⬜⬜⬜⬜[header=Меню2:43]⬛[/header]⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜[header=Меню2:62]⬛[/header]⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+[/block]
+[block=Меню1:2]
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜[header=Меню2:5]⬛[/header]⬜⬜⬜⬜⬜⬜⬜⬜
+⬜[header=Меню2:22]⬛[/header]⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+[/block]
+[block=Меню1:3]
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜[header=Меню2:6]⬛[/header]⬜⬜⬜
+⬜[header=Меню2:34]⬛[/header]⬜⬜[header=Меню2:37]⬛[/header]⬜[header=Меню2:38]⬛[/header]⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜[header=Меню2:15]⬛[/header]⬜
+⬜⬜⬜⬜⬜[header=Меню2:55]⬛[/header]⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+[/block]
+[block=Меню1:4]
+[header=Меню2:3]⬛[/header]⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜[header=Меню2:36]⬛[/header]⬜⬜⬜[header=Меню2:90]⬛[/header]⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+[/block]
+[block=Меню1:5]
+⬜[header=Меню2:4]⬛[/header]⬜⬜⬜⬜⬜⬜⬜⬜
+[header=Меню2:43]⬛[/header][header=Меню2:52]⬛[/header]⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜[header=Меню2:75]⬛[/header]⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜[header=Меню2:90]⬛[/header]⬜
+⬜⬜⬜⬜⬜[header=Меню2:23]⬛[/header]⬜⬜⬜⬜
+[/block]
+[block=Меню1:6]
+⬜⬜⬜⬜⬜⬜⬜⬜[header=Меню2:1]1️⃣[/header]⬜
+⬜⬜⬜[header=Меню2:7]⬛[/header]⬜⬜⬜⬜[header=Меню2:99]⬛[/header]⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜[header=Меню2:84]⬛[/header]⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜[header=Меню2:65]⬛[/header]⬜⬜
+[header=Меню2:41]⬛[/header]⬜⬜⬜⬜⬜⬜⬜⬜⬜
+[/block]
+[block=Меню1:7]
+⬜[header=Меню2:49]⬛[/header]⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜[header=Меню2:8]⬛[/header]⬜⬜[header=Меню2:83]⬛[/header]⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜[header=Меню2:55]⬛[/header]⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+[/block]
+[block=Меню1:8]
+⬜⬜[header=Меню2:9]⬛[/header]⬜⬜⬜⬜⬜[header=Меню2:25]⬛[/header]⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜[header=Меню2:15]⬛[/header][header=Меню2:70]⬛[/header]⬜⬜[header=Меню2:49]⬛[/header]⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜[header=Меню2:65]⬛[/header]⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+[/block]
+[block=Меню1:9]
+⬜⬜⬜[header=Меню2:59]⬛[/header]⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+[header=Меню2:10]⬛[/header]⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+[header=Меню2:66]⬛[/header]⬜⬜[header=Меню2:85]⬛[/header]⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+[/block]
+[block=Меню1:10]
+⬜⬜⬜⬜[header=Меню2:11]⬛[/header]⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜[header=Меню2:98]⬛[/header]⬜⬜⬜⬜⬜⬜⬜
+[header=Меню2:54]⬛[/header]⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜[header=Меню2:98]⬛[/header]⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+[/block]
+[block=Меню1:11]
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜[header=Меню2:14]⬛[/header]⬜
+⬜⬜[header=Меню2:12]⬛[/header]⬜⬜[header=Меню2:40]⬛[/header]⬜⬜⬜⬜
+[/block]
+[block=Меню1:12]
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜[header=Меню2:15]⬛[/header]⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜[header=Меню2:27]⬛[/header]⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+[header=Меню2:9]⬛[/header]⬜⬜⬜⬜⬜⬜⬜⬜⬜
+[/block]
+[block=Меню1:13]
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜[header=Меню2:15]⬛[/header]⬜⬜⬜
+⬜[header=Меню2:40]⬛[/header]⬜⬜⬜[header=Меню2:70]⬛[/header]⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+[header=Меню2:35]⬛[/header]⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+[/block]
+[block=Меню1:14]
+⬜⬜⬜⬜⬜⬜⬜⬜[header=Меню2:15]⬛[/header]⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜[header=Меню2:86]⬛[/header]⬜⬜⬜
+⬜⬜⬜⬜[header=Меню2:4]⬛[/header]⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜[header=Меню2:30]⬛[/header]⬜
+[/block]
+[block=Меню1:15]
+⬜⬜[header=Меню2:16]⬛[/header]⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜[header=Меню2:75]⬛[/header]⬜[header=Меню2:72]⬛[/header]⬜⬜
+[header=Меню2:53]⬛[/header]⬜⬜⬜⬜⬜[header=Меню2:7]⬛[/header]⬜⬜⬜
+⬜⬜⬜⬜[header=Меню2:5]⬛[/header]⬜⬜⬜⬜⬜
+[/block]
+[block=Меню1:16]
+⬜⬜⬜⬜[header=Меню2:76]⬛[/header]⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜[header=Меню2:34]⬛[/header]⬜⬜⬜⬜
+⬜⬜[header=Меню2:24]⬛[/header][header=Меню2:83]⬛[/header]⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜[header=Меню2:27]⬛[/header]⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜[header=Меню2:7]⬛[/header][header=Меню2:17]⬛[/header]⬜
+[/block]
+[block=Меню1:17]
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+[header=Меню2:20]⬛[/header]⬜⬜⬜⬜⬜⬜⬜[header=Меню2:18]⬛[/header]⬜
+[/block]
+[block=Меню1:18]
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜[header=Меню2:19]⬛[/header]⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜[header=Меню2:29]⬛[/header]⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+[/block]
+[block=Меню1:19]
+⬜⬜⬜⬜⬜⬜⬜⬜[header=Меню2:36]⬛[/header]⬜
+⬜⬜⬜⬜⬜⬜[header=Меню2:79]⬛[/header]⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜[header=Меню2:68]⬛[/header]⬜⬜
+[header=Меню2:25]⬛[/header]⬜⬜[header=Меню2:20]⬛[/header]⬜⬜⬜⬜⬜⬜
+⬜[header=Меню2:84]⬛[/header]⬜⬜⬜⬜⬜[header=Меню2:97]⬛[/header]⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+[/block]
+[block=Меню1:20]
+[header=Меню2:21]⬛[/header]⬜⬜⬜[header=Меню2:15]⬛[/header]⬜⬜⬜⬜⬜
+⬜⬜⬜⬜[header=Меню2:86]⬛[/header]⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜[header=Меню2:91]⬛[/header]⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+[/block]
+[block=Меню1:21]
+⬜⬜⬜⬜⬜⬜⬜⬜[header=Меню2:40]⬛[/header]⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜[header=Меню2:22]⬛[/header]⬜⬜[header=Меню2:63]⬛[/header]⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜[header=Меню2:43]⬛[/header][header=Меню2:16]⬛[/header]⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+[/block]
+[block=Меню1:22]
+⬜⬜⬜⬜⬜⬜⬜[header=Меню2:25]⬛[/header]⬜⬜
+⬜⬜⬜⬜⬜⬜[header=Меню2:20]⬛[/header]⬜⬜⬜
+⬜⬜[header=Меню2:19]⬛[/header]⬜⬜[header=Меню2:94]⬛[/header]⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜[header=Меню2:21]⬛[/header]⬜⬜⬜
+[header=Меню2:16]⬛[/header]⬜⬜⬜⬜⬜⬜⬜⬜⬜
+[/block]
+[block=Меню1:23]
+⬜⬜⬜⬜[header=Меню2:78]⬛[/header]⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜[header=Меню2:95]⬛[/header]⬜⬜⬜⬜⬜[header=Меню2:12]⬛[/header][header=Меню2:98]⬛[/header]⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+[/block]
+[block=Меню1:24]
+⬜⬜⬜⬜⬜[header=Меню2:2]⬛[/header]⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜[header=Меню2:14]⬛[/header]⬜
+⬜⬜⬜⬜[header=Меню2:56]⬛[/header]⬜[header=Меню2:86]⬛[/header]⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜[header=Меню2:33]⬛[/header]⬜[header=Меню2:93]⬛[/header]⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜[header=Меню2:69]⬛[/header]⬜⬜
+[/block]
+[block=Меню1:25]
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜[header=Меню2:26]⬛[/header]⬜⬜⬜⬜⬜⬜⬜⬜
+[header=Меню2:15]⬛[/header]⬜⬜⬜⬜⬜⬜⬜⬜⬜
+[/block]
+[block=Меню1:26]
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜[header=Меню2:18]⬛[/header]⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜[header=Меню2:46]⬛[/header]⬜⬜⬜⬜⬜
+⬜⬜⬜[header=Меню2:46]⬛[/header]⬜⬜⬜⬜⬜⬜
+⬜⬜⬜[header=Меню2:56]⬛[/header]⬜⬜⬜⬜⬜⬜
+[/block]
+[block=Меню1:27]
+⬜⬜⬜⬜⬜⬜[header=Меню2:32]⬛[/header]⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜[header=Меню2:39]⬛[/header][header=Меню2:5]⬛[/header]⬜⬜[header=Меню2:39]⬛[/header]⬜⬜⬜
+⬜⬜⬜⬜[header=Меню2:93]⬛[/header]⬜⬜[header=Меню2:32]⬛[/header]⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+[header=Меню2:50]⬛[/header]⬜⬜⬜⬜⬜⬜⬜⬜⬜
+[/block]
+[block=Меню1:28]
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜[header=Меню2:27]⬛[/header]⬜[header=Меню2:41]⬛[/header]⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+[/block]
+[block=Меню1:29]
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+[header=Меню2:28]⬛[/header]⬜⬜⬜⬜⬜⬜⬜[header=Меню2:65]⬛[/header]⬜
+⬜⬜⬜⬜⬜⬜[header=Меню2:25]⬛[/header]⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜[header=Меню2:40]⬛[/header]⬜⬜
+[/block]
+[block=Меню1:30]
+⬜⬜⬜⬜[header=Меню2:31]⬛[/header][header=Меню2:67]⬛[/header]⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜[header=Меню2:20]⬛[/header]⬜⬜
+⬜[header=Меню2:90]⬛[/header]⬜⬜⬜[header=Меню2:59]⬛[/header]⬜⬜⬜⬜
+⬜⬜⬜⬜[header=Меню2:89]⬛[/header]⬜⬜⬜[header=Меню2:12]⬛[/header]⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+[/block]
+[block=Меню1:31]
+[header=Меню2:99]⬛[/header]⬜⬜⬜⬜⬜[header=Меню2:77]⬛[/header]⬜[header=Меню2:48]⬛[/header]⬜
+⬜[header=Меню2:95]⬛[/header]⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜[header=Меню2:70]⬛[/header]⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜[header=Меню2:33]⬛[/header]⬜⬜⬜⬜
+[/block]
+[block=Меню1:32]
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜[header=Меню2:10]⬛[/header]⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜[header=Меню2:14]⬛[/header]⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+[/block]
+[block=Меню1:33]
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+[header=Меню2:3]⬛[/header]⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜[header=Меню2:58]⬛[/header][header=Меню2:62]⬛[/header]⬜⬜⬜
+⬜⬜⬜⬜⬜[header=Меню2:84]⬛[/header]⬜⬜⬜⬜
+⬜⬜⬜⬜[header=Меню2:47]⬛[/header]⬜⬜⬜⬜⬜
+[header=Меню2:98]⬛[/header][header=Меню2:47]⬛[/header]⬜⬜⬜⬜⬜⬜⬜⬜
+[/block]
+[block=Меню1:34]
+⬜⬜⬜⬜[header=Меню2:80]⬛[/header]⬜⬜⬜⬜⬜
+⬜⬜[header=Меню2:4]⬛[/header]⬜⬜⬜⬜⬜⬜⬜
+[header=Меню2:16]⬛[/header]⬜⬜⬜⬜⬜[header=Меню2:45]⬛[/header]⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜[header=Меню2:61]⬛[/header]⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜[header=Меню2:93]⬛[/header]⬜⬜⬜⬜⬜⬜
+[/block]
+[block=Меню1:35]
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜[header=Меню2:16]⬛[/header]⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜[header=Меню2:42]⬛[/header]⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+[/block]
+\`;
+        
+    // === ВИЗУАЛИЗАЦИЯ (ЧАСТЬ 2: ДОБАВЛЕНИЕ) ===
+    rawBBCodeVisuals += `
+[block=Меню1:36]
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜[header=Меню2:3]⬛[/header]⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜[header=Меню2:33]⬛[/header]⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+[/block]
+[block=Меню1:37]
+⬜⬜⬜[header=Меню2:19]⬛[/header]⬜⬜[header=Меню2:66]⬛[/header]⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜[header=Меню2:1]1️⃣[/header]⬜[header=Меню2:14]⬛[/header]⬜⬜⬜⬜⬜
+[header=Меню2:69]⬛[/header]⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜[header=Меню2:36]⬛[/header]⬜⬜⬜
+[/block]
+[block=Меню1:38]
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜[header=Меню2:87]⬛[/header]⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜[header=Меню2:55]⬛[/header]⬜
+⬜⬜[header=Меню2:39]⬛[/header]⬜⬜⬜⬜⬜⬜⬜
+[/block]
+[block=Меню1:39]
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+[header=Меню2:11]⬛[/header]⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜[header=Меню2:57]⬛[/header]⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜[header=Меню2:54]⬛[/header]⬜⬜
+[/block]
+[block=Меню1:40]
+⬜⬜⬜⬜⬜[header=Меню2:48]⬛[/header]⬜⬜⬜⬜
+⬜⬜⬜⬜⬜[header=Меню2:28]⬛[/header]⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜[header=Меню2:23]⬛[/header]⬜⬜⬜⬜[header=Меню2:8]⬛[/header]⬜
+[header=Меню2:11]⬛[/header]⬜⬜⬜⬜⬜⬜⬜⬜⬜
+[/block]
+[block=Меню1:41]
+[header=Меню2:42]⬛[/header]⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜[header=Меню2:65]⬛[/header]⬜⬜⬜⬜
+[/block]
+[block=Меню1:42]
+⬜⬜⬜⬜⬜⬜[header=Меню2:2]⬛[/header]⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜[header=Меню2:89]⬛[/header]⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+[/block]
+[block=Меню1:43]
+⬜⬜⬜⬜[header=Меню2:34]⬛[/header]⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜[header=Меню2:3]⬛[/header]⬜⬜[header=Меню2:9]⬛[/header]⬜⬜⬜⬜⬜
+⬜⬜[header=Меню2:48]⬛[/header]⬜⬜⬜⬜⬜[header=Меню2:9]⬛[/header]⬜
+[/block]
+[block=Меню1:44]
+⬜⬜⬜⬜⬜⬜⬜[header=Меню2:26]⬛[/header]⬜⬜
+[header=Меню2:58]⬛[/header]⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜[header=Меню2:28]⬛[/header]⬜⬜⬜[header=Меню2:3]⬛[/header]⬜[header=Меню2:74]⬛[/header]⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+[/block]
+[block=Меню1:45]
+⬜⬜⬜[header=Меню2:1]1️⃣[/header]⬜⬜[header=Меню2:43]⬛[/header]⬜⬜⬜
+⬜⬜⬜⬜⬜[header=Меню2:82]⬛[/header]⬜⬜⬜⬜
+[header=Меню2:71]⬛[/header][header=Меню2:72]⬛[/header]⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜[header=Меню2:41]⬛[/header]⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜[header=Меню2:5]⬛[/header]⬜
+[/block]
+[block=Меню1:46]
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜[header=Меню2:19]⬛[/header]⬜[header=Меню2:72]⬛[/header]⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+[header=Меню2:39]⬛[/header]⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜[header=Меню2:37]⬛[/header]⬜[header=Меню2:68]⬛[/header]⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+[/block]
+[block=Меню1:47]
+⬜⬜⬜⬜⬜⬜[header=Меню2:48]⬛[/header]⬜⬜⬜
+⬜⬜⬜⬜⬜[header=Меню2:6]⬛[/header]⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜[header=Меню2:42]⬛[/header]⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+[/block]
+[block=Меню1:48]
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜[header=Меню2:49]⬛[/header]⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜[header=Меню2:61]⬛[/header]⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜[header=Меню2:25]⬛[/header]⬜⬜⬜⬜
+⬜[header=Меню2:3]⬛[/header]⬜⬜⬜⬜⬜⬜⬜⬜
+[/block]
+[block=Меню1:49]
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜[header=Меню2:27]⬛[/header]⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜[header=Меню2:57]⬛[/header][header=Меню2:32]⬛[/header]⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜[header=Меню2:12]⬛[/header]⬜⬜⬜⬜⬜
+[header=Меню2:56]⬛[/header]⬜⬜⬜[header=Меню2:52]⬛[/header]⬜⬜⬜⬜⬜
+[/block]
+[block=Меню1:50]
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜[header=Меню2:73]⬛[/header]⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+[header=Меню2:60]⬛[/header]⬜⬜⬜⬜⬜⬜⬜⬜⬜
+[/block]
+[block=Меню1:51]
+⬜⬜⬜⬜⬜⬜[header=Меню2:93]⬛[/header]⬜⬜⬜
+⬜⬜⬜⬜⬜[header=Меню2:77]⬛[/header]⬜⬜⬜⬜
+⬜⬜⬜[header=Меню2:13]⬛[/header]⬜[header=Меню2:38]⬛[/header]⬜⬜[header=Меню2:74]⬛[/header]⬜
+⬜⬜[header=Меню2:75]⬛[/header]⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+[/block]
+[block=Меню1:52]
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜[header=Меню2:8]⬛[/header]⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜[header=Меню2:99]⬛[/header]⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+[/block]
+[block=Меню1:53]
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜[header=Меню2:54]⬛[/header]⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜[header=Меню2:93]⬛[/header][header=Меню2:92]⬛[/header]⬜⬜⬜⬜
+⬜⬜[header=Меню2:68]⬛[/header]⬜⬜⬜⬜⬜⬜⬜
+[/block]
+[block=Меню1:54]
+⬜⬜⬜⬜⬜⬜[header=Меню2:55]⬛[/header]⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+[header=Меню2:87]⬛[/header]⬜⬜⬜⬜⬜⬜⬜⬜⬜
+[header=Меню2:87]⬛[/header]⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+[/block]
+[block=Меню1:55]
+⬜⬜⬜[header=Меню2:68]⬛[/header]⬜[header=Меню2:100]⬛[/header]⬜⬜⬜⬜
+[header=Меню2:4]⬛[/header]⬜⬜[header=Меню2:62]⬛[/header]⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+[header=Меню2:85]⬛[/header]⬜[header=Меню2:28]⬛[/header]⬜⬜[header=Меню2:94]⬛[/header]⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+[/block]
+[block=Меню1:56]
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜[header=Меню2:78]⬛[/header]⬜
+⬜⬜[header=Меню2:40]⬛[/header]⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜[header=Меню2:77]⬛[/header][header=Меню2:81]⬛[/header][header=Меню2:88]⬛[/header]⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜[header=Меню2:76]⬛[/header]⬜⬜⬜⬜
+[/block]
+[block=Меню1:57]
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜[header=Меню2:64]⬛[/header]⬜⬜⬜[header=Меню2:38]⬛[/header]⬜⬜⬜⬜
+⬜[header=Меню2:45]⬛[/header][header=Меню2:13]⬛[/header]⬜⬜⬜⬜⬜⬜⬜
+⬜⬜[header=Меню2:10]⬛[/header]⬜⬜⬜⬜⬜[header=Меню2:3]⬛[/header]⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜[header=Меню2:1]1️⃣[/header]⬜⬜⬜
+[/block]
+[block=Меню1:58]
+⬜[header=Меню2:42]⬛[/header]⬜[header=Меню2:65]⬛[/header]⬜⬜⬜⬜⬜⬜
+[header=Меню2:26]⬛[/header]⬜⬜[header=Меню2:53]⬛[/header]⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜[header=Меню2:46]⬛[/header]⬜⬜⬜
+⬜[header=Меню2:48]⬛[/header]⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜[header=Меню2:5]⬛[/header]⬜[header=Меню2:27]⬛[/header]⬜⬜⬜⬜⬜
+[/block]
+[block=Меню1:59]
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+[header=Меню2:60]⬛[/header]⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+[header=Меню2:67]⬛[/header]⬜⬜[header=Меню2:85]⬛[/header]⬜⬜⬜⬜⬜⬜
+[/block]
+[block=Меню1:60]
+⬜⬜⬜⬜⬜⬜⬜⬜[header=Меню2:38]⬛[/header]⬜
+⬜[header=Меню2:48]⬛[/header]⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜[header=Меню2:71]⬛[/header]⬜⬜⬜⬜
+⬜⬜⬜[header=Меню2:18]⬛[/header]⬜⬜[header=Меню2:58]⬛[/header]⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+[/block]
+[block=Меню1:61]
+⬜⬜⬜⬜⬜⬜⬜[header=Меню2:53]⬛[/header]⬜⬜
+⬜⬜⬜⬜⬜⬜⬜[header=Меню2:18]⬛[/header][header=Меню2:93]⬛[/header]⬜
+[header=Меню2:6]⬛[/header]⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜[header=Меню2:62]⬛[/header]⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜[header=Меню2:6]⬛[/header]⬜[header=Меню2:73]⬛[/header]⬜
+[/block]
+[block=Меню1:62]
+⬜⬜[header=Меню2:63]⬛[/header]⬜⬜⬜⬜⬜[header=Меню2:99]⬛[/header]⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜[header=Меню2:74]⬛[/header]⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+[/block]
+[block=Меню1:63]
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜[header=Меню2:1]1️⃣[/header]⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜[header=Меню2:57]⬛[/header]⬜⬜⬜[header=Меню2:33]⬛[/header]⬜[header=Меню2:88]⬛[/header]⬜
+[/block]
+[block=Меню1:64]
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜[header=Меню2:7]⬛[/header]⬜⬜⬜⬜[header=Меню2:88]⬛[/header]⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜[header=Меню2:29]⬛[/header]⬜⬜⬜⬜⬜⬜
+[/block]
+[block=Меню1:65]
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+[header=Меню2:66]⬛[/header]⬜⬜⬜⬜⬜⬜⬜⬜⬜
+[header=Меню2:50]⬛[/header]⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜[header=Меню2:80]⬛[/header]⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜[header=Меню2:77]⬛[/header]⬜
+[/block]
+[block=Меню1:66]
+⬜⬜⬜⬜⬜⬜⬜⬜[header=Меню2:79]⬛[/header]⬜
+[header=Меню2:25]⬛[/header]⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜[header=Меню2:59]⬛[/header]⬜⬜
+⬜⬜⬜⬜[header=Меню2:59]⬛[/header]⬜[header=Меню2:57]⬛[/header]⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜[header=Меню2:80]⬛[/header][header=Меню2:8]⬛[/header]⬜⬜⬜
+[/block]
+[block=Меню1:67]
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜[header=Меню2:68]⬛[/header]⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜[header=Меню2:53]⬛[/header]⬜[header=Меню2:45]⬛[/header]⬜⬜⬜⬜⬜
+⬜⬜⬜[header=Меню2:50]⬛[/header]⬜⬜⬜[header=Меню2:97]⬛[/header]⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+[/block]
+[block=Меню1:68]
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜[header=Меню2:41]⬛[/header]⬜[header=Меню2:34]⬛[/header]⬜[header=Меню2:38]⬛[/header]⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜[header=Меню2:69]⬛[/header]⬜⬜⬜⬜⬜⬜⬜⬜
+[/block]
+[block=Меню1:69]
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜[header=Меню2:12]⬛[/header][header=Меню2:75]⬛[/header]⬜⬜⬜⬜
+⬜[header=Меню2:81]⬛[/header]⬜⬜⬜⬜⬜⬜⬜⬜
+⬜[header=Меню2:52]⬛[/header]⬜[header=Меню2:63]⬛[/header]⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜[header=Меню2:19]⬛[/header]⬜⬜
+[/block]
+[block=Меню1:70]
+⬜⬜⬜⬜⬜⬜[header=Меню2:24]⬛[/header][header=Меню2:42]⬛[/header]⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜[header=Меню2:2]⬛[/header]⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜[header=Меню2:60]⬛[/header]⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜[header=Меню2:66]⬛[/header]⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+[/block]
+\`;
+
+    // === ВИЗУАЛИЗАЦИЯ (ЧАСТЬ 3: ФИНАЛ) ===
+    rawBBCodeVisuals += `
+[block=Меню1:71]
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+[header=Меню2:50]⬛[/header]⬜⬜⬜⬜⬜⬜⬜[header=Меню2:30]⬛[/header]⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜[header=Меню2:60]⬛[/header]⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜[header=Меню2:36]⬛[/header]⬜⬜⬜
+[/block]
+[block=Меню1:72]
+[header=Меню2:73]⬛[/header]⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜[header=Меню2:51]⬛[/header]⬜⬜
+[/block]
+[block=Меню1:73]
+[header=Меню2:70]⬛[/header]⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜[header=Меню2:26]⬛[/header]⬜⬜⬜⬜⬜⬜⬜
+⬜[header=Меню2:94]⬛[/header]⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜[header=Меню2:19]⬛[/header]⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜[header=Меню2:97]⬛[/header]⬜⬜⬜⬜⬜⬜
+[/block]
+[block=Меню1:74]
+⬜⬜⬜⬜⬜[header=Меню2:23]⬛[/header]⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜[header=Меню2:31]⬛[/header]⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+[/block]
+[block=Меню1:75]
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+[header=Меню2:83]⬛[/header]⬜[header=Меню2:35]⬛[/header]⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜[header=Меню2:87]⬛[/header][header=Меню2:57]⬛[/header]⬜⬜️⬜
+[/block]
+[block=Меню1:76]
+⬜⬜⬜⬜⬜[header=Меню2:79]⬛[/header][header=Меню2:96]⬛[/header][header=Меню2:2]⬛[/header]⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜[header=Меню2:23]⬛[/header]⬜[header=Меню2:48]⬛[/header]⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜[header=Меню2:55]⬛[/header]⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+[/block]
+[block=Меню1:77]
+[header=Меню2:73]⬛[/header]⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜[header=Меню2:42]⬛[/header]⬜⬜⬜⬜⬜
+⬜⬜[header=Меню2:72]⬛[/header]⬜⬜[header=Меню2:66]⬛[/header]⬜⬜⬜⬜
+[/block]
+[block=Меню1:78]
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜[header=Меню2:79]⬛[/header]⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜[header=Меню2:53]⬛[/header]⬜⬜
+⬜⬜⬜⬜[header=Меню2:44]⬛[/header]⬜[header=Меню2:91]⬛[/header]⬜⬜⬜
+[/block]
+[block=Меню1:79]
+⬜⬜⬜⬜[header=Меню2:69]⬛[/header]⬜⬜⬜⬜⬜
+⬜[header=Меню2:83]⬛[/header]⬜⬜⬜⬜[header=Меню2:24]⬛[/header]⬜[header=Меню2:87]⬛[/header]⬜
+⬜⬜⬜⬜[header=Меню2:60]⬛[/header]⬜⬜⬜⬜⬜
+⬜⬜[header=Меню2:3]⬛[/header]⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜[header=Меню2:2]⬛[/header]⬜⬜⬜⬜⬜
+[/block]
+[block=Меню1:80]
+⬜⬜⬜⬜⬜[header=Меню2:81]⬛[/header]⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜[header=Меню2:16]⬛[/header]⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+[/block]
+[block=Меню1:81]
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜[header=Меню2:45]⬛[/header]⬜
+⬜⬜⬜⬜[header=Меню2:92]⬛[/header]⬜⬜⬜⬜⬜
+⬜[header=Меню2:34]⬛[/header]⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜[header=Меню2:18]⬛[/header]⬜[header=Меню2:26]⬛[/header]⬜⬜
+⬜[header=Меню2:18]⬛[/header]⬜⬜⬜⬜[header=Меню2:32]⬛[/header]⬜⬜⬜
+[/block]
+[block=Меню1:82]
+⬜⬜⬜⬜⬜⬜⬜[header=Меню2:80]⬛[/header]⬜⬜
+⬜[header=Меню2:79]⬛[/header]⬜⬜⬜⬜[header=Меню2:2]⬛[/header]⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜[header=Меню2:77]⬛[/header]⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+[/block]
+[block=Меню1:83]
+[header=Меню2:6]⬛[/header]⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜[header=Меню2:48]⬛[/header]⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜[header=Меню2:73]⬛[/header]⬜⬜⬜⬜⬜⬜
+⬜[header=Меню2:93]⬛[/header]⬜⬜⬜⬜⬜[header=Меню2:21]⬛[/header]⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+[/block]
+[block=Меню1:84]
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜[header=Меню2:26]⬛[/header]⬜⬜[header=Меню2:25]⬛[/header]⬜⬜⬜
+⬜[header=Меню2:20]⬛[/header]⬜[header=Меню2:39]⬛[/header]⬜[header=Меню2:20]⬛[/header]⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜[header=Меню2:28]⬛[/header]⬜⬜
+[/block]
+[block=Меню1:85]
+⬜⬜⬜⬜[header=Меню2:54]⬛[/header]⬜⬜[header=Меню2:3]⬛[/header]⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜[header=Меню2:25]⬛[/header]⬜⬜⬜⬜
+⬜[header=Меню2:72]⬛[/header]⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜[header=Меню2:92]⬛[/header]⬜⬜⬜⬜⬜
+[/block]
+[block=Меню1:86]
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜[header=Меню2:54]⬛[/header]⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+[header=Меню2:6]⬛[/header]⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜[header=Меню2:66]⬛[/header]⬜⬜⬜⬜⬜⬜
+[/block]
+[block=Меню1:87]
+⬜⬜⬜⬜⬜[header=Меню2:61]⬛[/header]⬜[header=Меню2:80]⬛[/header]⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜[header=Меню2:88]⬛[/header]⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜[header=Меню2:7]⬛[/header][header=Меню2:57]⬛[/header]⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+[/block]
+[block=Меню1:88]
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜[header=Меню2:76]⬛[/header]⬜[header=Меню2:23]⬛[/header]⬜⬜⬜⬜
+⬜⬜[header=Меню2:95]⬛[/header]⬜⬜[header=Меню2:90]⬛[/header]⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜[header=Меню2:76]⬛[/header]⬜⬜⬜⬜[header=Меню2:87]⬛[/header]⬜[header=Меню2:96]⬛[/header]⬜
+[/block]
+[block=Меню1:89]
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜[header=Меню2:74]⬛[/header][header=Меню2:25]⬛[/header]⬜⬜⬜
+⬜⬜⬜[header=Меню2:19]⬛[/header]⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜[header=Меню2:96]⬛[/header]⬜
+[/block]
+[block=Меню1:90]
+⬜[header=Меню2:28]⬛[/header]⬜⬜⬜[header=Меню2:59]⬛[/header]⬜⬜⬜⬜
+⬜[header=Меню2:61]⬛[/header]⬜⬜⬜⬜[header=Меню2:53]⬛[/header]⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜[header=Меню2:46]⬛[/header]⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜[header=Меню2:4]⬛[/header]⬜⬜
+[/block]
+[block=Меню1:91]
+[header=Меню2:72]⬛[/header]⬜⬜⬜⬜⬜⬜[header=Меню2:64]⬛[/header]⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+[/block]
+[block=Меню1:92]
+⬜⬜⬜⬜[header=Меню2:67]⬛[/header]⬜⬜⬜⬜⬜
+⬜[header=Меню2:12]⬛[/header]⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜[header=Меню2:78]⬛[/header]⬜
+⬜[header=Меню2:26]⬛[/header]⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜[header=Меню2:76]⬛[/header][header=Меню2:70]⬛[/header]⬜⬜⬜
+⬜⬜[header=Меню2:9]⬛[/header]⬜⬜⬜⬜⬜⬜⬜
+[/block]
+[block=Меню1:93]
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜[header=Меню2:100]⬛[/header]⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜[header=Меню2:31]⬛[/header]⬜⬜⬜⬜[header=Меню2:47]⬛[/header]⬜⬜⬜
+[header=Меню2:40]⬛[/header]⬜⬜⬜⬜[header=Меню2:92]⬛[/header][header=Меню2:73]⬛[/header]⬜⬜⬜
+[/block]
+[block=Меню1:94]
+⬜⬜⬜⬜⬜⬜⬜[header=Меню2:29]⬛[/header]⬜⬜
+⬜⬜⬜⬜⬜[header=Меню2:18]⬛[/header]⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜[header=Меню2:27]⬛[/header]⬜⬜[header=Меню2:51]⬛[/header][header=Меню2:42]⬛[/header]⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+[header=Меню2:91]⬛[/header]⬜[header=Меню2:42]⬛[/header]⬜⬜⬜⬜⬜⬜⬜
+[/block]
+[block=Меню1:95]
+⬜⬜⬜⬜⬜⬜⬜⬜[header=Меню2:89]⬛[/header]⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜[header=Меню2:62]⬛[/header]⬜⬜⬜⬜⬜⬜⬜
+⬜⬜[header=Меню2:68]⬛[/header]⬜⬜⬜⬜[header=Меню2:96]⬛[/header]⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜[header=Меню2:79]⬛[/header]⬜⬜⬜⬜⬜⬜⬜⬜
+[/block]
+[block=Меню1:96]
+⬜[header=Меню2:97]⬛[/header]⬜⬜⬜⬜[header=Меню2:45]⬛[/header]⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜[header=Меню2:21]⬛[/header]⬜⬜
+⬜⬜⬜⬜⬜[header=Меню2:21]⬛[/header]⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜[header=Меню2:9]⬛[/header]⬜⬜⬜
+[/block]
+[block=Меню1:97]
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜[header=Меню2:32]⬛[/header]⬜⬜[header=Меню2:82]⬛[/header]⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+[/block]
+[block=Меню1:98]
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜[header=Меню2:52]⬛[/header][header=Меню2:39]⬛[/header]⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+[/block]
+[block=Меню1:99]
+⬜⬜⬜⬜[header=Меню2:79]⬛[/header]⬜[header=Меню2:18]⬛[/header]⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜[header=Меню2:25]⬛[/header]⬜[header=Меню2:18]⬛[/header]⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜[header=Меню2:47]⬛[/header]⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜[header=Меню2:36]⬛[/header]⬜[header=Меню2:37]⬛[/header][header=Меню2:7]⬛[/header]⬜⬜
+[/block]
+[block=Меню1:100]
+⬜⬜⬜⬜[header=Меню2:48]⬛[/header]⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜[header=Меню2:28]⬛[/header]⬜⬜⬜⬜
+⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜⬜[header=Меню2:17]⬛[/header]⬜⬜⬜⬜
+⬜⬜⬜⬜[header=Меню2:49]⬛[/header]⬜⬜⬜⬜⬜
+⬜[header=Меню2:69]⬛[/header]⬜⬜⬜⬜⬜⬜[header=Меню2:44]⬛[/header]⬜
+[/block]
+\`;
+
+    // === ЗАПУСК ===
+    parseGraph();   // Считываем связи из XML
+    parseVisuals(); // Считываем картинки из BB-кодов
+
 </script>
 
 </body>
