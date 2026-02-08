@@ -115,7 +115,6 @@
     <div class="input-group"><label>Конечная степь:</label><input type="text" id="endNode" placeholder="100"></div>
     <button class="main-btn" onclick="calculateRoute()">Построить маршрут</button>
     <div id="result"></div>
-    <button class="copy-btn" style="background: #eab308; margin-top: 10px;" onclick="runDiagnostics()">🛠 Проверить ошибки</button>
     <button id="saveImgBtn" class="copy-btn" style="display:none" onclick="saveAsImage()">Скачать маршрут как картинку</button>
 </div>
 
@@ -1190,7 +1189,7 @@
             link.click();
         });
     }
-
+/*
     function runDiagnostics() {
         const resultDiv = document.getElementById("result");
         resultDiv.classList.remove("export-mode"); // Выключаем табличный вид, если был
@@ -1243,7 +1242,7 @@
             resultDiv.innerHTML += `<div style="color: #4ade80;">✅ Ошибок не найдено! Граф идеален.</div>`;
         }
     }
-
+*/
     // Запуск
     parseGraph();
     parseVisuals();
