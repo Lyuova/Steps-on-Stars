@@ -115,6 +115,7 @@
     <div class="input-group"><label>Конечная степь:</label><input type="text" id="endNode" placeholder="100"></div>
     <button class="main-btn" onclick="calculateRoute()">Построить маршрут</button>
     <div id="result"></div>
+    <button class="copy-btn" style="background: #eab308; margin-top: 10px;" onclick="runDiagnostics()">🛠 Проверить ошибки</button>
     <button id="saveImgBtn" class="copy-btn" style="display:none" onclick="saveAsImage()">Скачать маршрут как картинку</button>
 </div>
 
@@ -1190,6 +1191,58 @@
         });
     }
 
+    function runDiagnostics() {
+        const resultDiv = document.getElementById("result");
+        resultDiv.classList.remove("export-mode"); // Выключаем табличный вид, если был
+        resultDiv.innerHTML = "<h3>🔍 Результат диагностики:</h3>";
+        
+        let errorCount = 0;
+
+        // Проходим по всем известным степям
+        for (let label in labelToId) {
+            let id = labelToId[label];
+
+            // 1. Собираем, куда ведут связи из XML (реальные пути)
+            let xmlTargets = new Set();
+            if (adjacency[id]) {
+                adjacency[id].forEach(targetId => {
+                    xmlTargets.add(idToLabel[targetId]);
+                });
+            }
+
+            // 2. Собираем, что нарисовано (визуальные пути)
+            let visualTargets = new Set();
+            if (visualData[label]) {
+                visualData[label].forEach(cell => {
+                    if (cell.type === 'exit') visualTargets.add(cell.target);
+                });
+            }
+
+            // 3. Ищем лишние связи (Призраки)
+            xmlTargets.forEach(t => {
+                if (!visualTargets.has(t)) {
+                    resultDiv.innerHTML += `<div style="color: #facc15; margin-bottom: 5px;">
+                        👻 <b>Степь ${label}:</b> В коде есть путь в <b>${t}</b>, а на картинке нет!
+                    </div>`;
+                    errorCount++;
+                }
+            });
+
+            // 4. Ищем забытые связи (Обрывы)
+            visualTargets.forEach(t => {
+                if (!xmlTargets.has(t)) {
+                    resultDiv.innerHTML += `<div style="color: #f87171; margin-bottom: 5px;">
+                        💔 <b>Степь ${label}:</b> Нарисован выход в <b>${t}</b>, но он НЕ РАБОТАЕТ (нет в XML).
+                    </div>`;
+                    errorCount++;
+                }
+            });
+        }
+
+        if (errorCount === 0) {
+            resultDiv.innerHTML += `<div style="color: #4ade80;">✅ Ошибок не найдено! Граф идеален.</div>`;
+        }
+    }
 
     // Запуск
     parseGraph();
