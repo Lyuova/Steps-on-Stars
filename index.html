@@ -76,7 +76,14 @@
             width: fit-content;             /* Ширина по содержимому */
             margin: 0 auto;                 /* Центрирование */
             align-items: start;
-            gap: 80 px 40 px;
+        }
+        #result.export-mode .step-container {
+            /* Первое число - отступ СНИЗУ (между рядами) */
+            margin-bottom: 100px !important; 
+            
+            /* Второе число - отступы ПО БОКАМ (между столбцами будет сумма, т.е. 20+20=40) */
+            margin-left: 20px !important;
+            margin-right: 20px !important;
         }
         
         /* Стрелочки скрываем всегда, чтобы не мешали */
