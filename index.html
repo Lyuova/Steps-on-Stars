@@ -145,6 +145,14 @@
             margin: 0 auto;
         }
 
+                /* Отступы для степей при включенной галочке (как при экспорте) */
+        #result.two-columns .step-container {
+            margin-bottom: 45px !important; 
+            margin-left: 10px !important;
+            margin-right: 10px !important;
+        }
+
+
         /* ПРЯЧЕМ ЧЕКБОКС НА ТЕЛЕФОНАХ (экраны уже 768px) */
         @media (max-width: 768px) {
             .two-cols-wrapper {
@@ -155,7 +163,9 @@
                 display: flex; 
             }
         }
-
+        #result:empty {
+            display: none;
+        }
     </style>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
 </head>
@@ -487,8 +497,8 @@
 [block=Меню1:35]
 ⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
 ⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
-⬜⬜[header=Меню2:16]⬛[/header]⬜⬜⬜⬜⬜⬜⬜
-⬜⬜⬜⬜[header=Меню2:42]⬛[/header]⬜⬜⬜⬜⬜
+⬜⬜⬜️[header=Меню2:16]⬛[/header]⬜⬜⬜⬜⬜⬜
+⬜⬜⬜⬜️⬜[header=Меню2:42]⬛[/header]⬜⬜⬜⬜
 ⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
 ⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
 [/block]
@@ -694,9 +704,9 @@
 [/block]
 [block=Меню1:61]
 ⬜⬜⬜⬜⬜⬜⬜[header=Меню2:53]⬛[/header]⬜⬜
-⬜⬜⬜⬜⬜⬜⬜[header=Меню2:18]⬛[/header][header=Меню2:93]⬛[/header]⬜
-[header=Меню2:6]⬛[/header]⬜⬜⬜⬜⬜⬜⬜⬜⬜
+[header=Меню2:6]⬛[/header]⬜⬜⬜⬜⬜⬜[header=Меню2:18]⬛[/header][header=Меню2:93]⬛[/header]⬜
 ⬜[header=Меню2:62]⬛[/header]⬜⬜⬜⬜⬜⬜⬜⬜
+⬜⬜️⬜⬜⬜⬜⬜⬜⬜⬜
 ⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
 ⬜⬜⬜⬜⬜⬜[header=Меню2:6]⬛[/header]⬜[header=Меню2:73]⬛[/header]⬜
 [/block]
@@ -983,7 +993,7 @@
 [block=Меню1:97]
 ⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
 ⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
-⬜⬜[header=Меню2:32]⬛[/header]⬜⬜[header=Меню2:82]⬛[/header]⬜⬜⬜⬜
+⬜⬜⬜️[header=Меню2:32]⬛[/header]⬜⬜[header=Меню2:82]⬛[/header]⬜⬜⬜
 ⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
 ⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
 ⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
