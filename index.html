@@ -1623,6 +1623,43 @@
         }
     }
 */
+        // === ИНТЕГРАЦИЯ С ИГРОЙ (АВТООБНОВЛЕНИЕ И ПАМЯТЬ) ===
+    
+    // 1. Слушаем сообщения от игры (Tampermonkey)
+    window.addEventListener('message', function(event) {
+        if (event.data && event.data.action === 'updateStart') {
+            const startInput = document.getElementById('startNode');
+            if (startInput) {
+                // Если мы перешли в новую степь
+                if (startInput.value !== event.data.steppe) {
+                    startInput.value = event.data.steppe;
+                    
+                    // МАГИЯ: Если конечная степь уже указана, маршрут перестроится САМ на ходу!
+                    const endInput = document.getElementById('endNode');
+                    if (endInput && endInput.value.trim() !== '') {
+                        calculateRoute();
+                    }
+                }
+            }
+        }
+    });
+
+    // 2. Сохраняем конечную степь при обновлении страницы
+    window.addEventListener('DOMContentLoaded', () => {
+        const endInput = document.getElementById('endNode');
+        
+        // Восстанавливаем из памяти
+        const savedEnd = localStorage.getItem('cwSavedEndSteppe');
+        if (savedEnd) {
+            endInput.value = savedEnd;
+        }
+
+        // Сохраняем любое изменение в поле "Финиш"
+        endInput.addEventListener('input', () => {
+            localStorage.setItem('cwSavedEndSteppe', endInput.value);
+        });
+    });
+
     // Запуск
     parseGraph();
     parseVisuals();
