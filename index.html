@@ -118,6 +118,44 @@
         .site-footer a:hover { color: #7dd3fc; text-decoration: underline; }
         .site-footer b { color: #94a3b8; }
 
+                /* --- ЧЕКБОКС "ДВА РЯДА" --- */
+        .two-cols-wrapper {
+            margin-top: 15px;
+            margin-bottom: 5px;
+            text-align: center;
+            color: #cbd5e1;
+            font-size: 0.95rem;
+        }
+        
+        /* Делаем сам квадратик чекбокса аккуратным */
+        .two-cols-wrapper input[type="checkbox"] {
+            width: auto;
+            padding: 0;
+            margin-right: 8px;
+            transform: scale(1.2);
+            cursor: pointer;
+        }
+
+        /* Визуальная сетка для сайта (без огромных отступов, как на картинке) */
+        #result.two-columns {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            width: fit-content;
+            margin: 0 auto;
+        }
+
+        /* ПРЯЧЕМ ЧЕКБОКС НА ТЕЛЕФОНАХ (экраны уже 768px) */
+        @media (max-width: 768px) {
+            .two-cols-wrapper {
+                display: none !important;
+            }
+            /* На мобилках всегда отключаем 2 ряда, даже если настройка сохранилась */
+            #result.two-columns {
+                display: flex; 
+            }
+        }
+
     </style>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
 </head>
@@ -135,6 +173,12 @@
     <div class="action-buttons"><button class="icon-btn" onclick="swapInputs()" title="Поменять местами">⇅</button></div>
     <div class="input-group"><label>Конечная степь:</label><input type="text" id="endNode" placeholder="100"></div>
     <button class="main-btn" onclick="calculateRoute()">Построить маршрут</button>
+        <div class="two-cols-wrapper">
+        <label style="cursor: pointer; display: inline-flex; align-items: center; justify-content: center;">
+            <input type="checkbox" id="twoColsCheckbox" onchange="toggleTwoColumns()">
+            Показывать маршрут в два ряда
+        </label>
+    </div>
     <div id="result"></div>
     <button id="saveImgBtn" class="copy-btn" style="display:none" onclick="saveAsImage()">Скачать маршрут как картинку</button>
         <button class="drawer-toggle" onclick="toggleDrawer()">Нарисовать степь</button>
@@ -1323,6 +1367,28 @@
         // Плавно прокручиваем страницу наверх к маршрутизатору
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
+    // --- ЛОГИКА ЧЕКБОКСА "ДВА РЯДА" ---
+    function toggleTwoColumns() {
+        const isChecked = document.getElementById("twoColsCheckbox").checked;
+        const resultDiv = document.getElementById("result");
+        
+        if (isChecked) {
+            resultDiv.classList.add("two-columns");
+            localStorage.setItem("twoColumnsPref", "true"); // Сохраняем в память
+        } else {
+            resultDiv.classList.remove("two-columns");
+            localStorage.setItem("twoColumnsPref", "false"); // Удаляем из памяти
+        }
+    }
+
+    // Проверяем память при загрузке страницы
+    window.addEventListener('DOMContentLoaded', () => {
+        const savedPref = localStorage.getItem("twoColumnsPref");
+        if (savedPref === "true") {
+            document.getElementById("twoColsCheckbox").checked = true;
+            document.getElementById("result").classList.add("two-columns");
+        }
+    });
 
 /*
     function runDiagnostics() {
