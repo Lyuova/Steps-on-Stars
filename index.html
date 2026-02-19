@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Навигатор по степям</title>
+    <link rel="icon" type="image/png" href="https://i.postimg.cc/Bv2h6BfN/Bez-nazvania617-20260219174018.png">
     <style>
         /* --- СТИЛИ (Дизайн) --- */
         body {
@@ -97,6 +98,26 @@
         .arrow-down { color: #94a3b8; font-size: 1.5rem; margin: 5px 0; }
         .copy-btn { margin-top: 20px; padding: 10px; background: #334155; color: #fff; border: none; border-radius: 5px; cursor: pointer; width: 100%; }
         .error { color: #f87171; text-align: center; }
+
+                            /* --- РИСОВАЛКА СТЕПИ --- */
+        .drawer-toggle { margin-top: 1rem; background: #1e293b; border: 1px solid #334155; color: #cbd5e1; padding: 0.8rem; width: 100%; border-radius: 6px; cursor: pointer; transition: background 0.3s; font-size: 1rem; }
+        .drawer-toggle:hover { background: #334155; color: #fff; }
+        .drawer-container { display: none; background-color: #1e293b; padding: 1.5rem; border-radius: 12px; margin-top: 1rem; border: 1px solid #334155; flex-direction: column; align-items: center; }
+        .drawer-grid { display: grid; grid-template-columns: repeat(10, 20px); grid-template-rows: repeat(6, 30px); gap: 4px; margin-bottom: 1rem; background: #0f172a; padding: 10px; border-radius: 8px; }
+        .drawer-cell { width: 20px; height: 30px; border-radius: 3px; background-color: #324154; cursor: pointer; transition: background 0.2s; }
+        .drawer-cell:hover { opacity: 0.8; box-shadow: inset 0 0 0 1px #4ACA86; }
+        .drawer-cell.active { background-color: #0F172A; }
+        .drawer-result { margin-bottom: 1rem; font-weight: bold; color: #4ACA86; min-height: 1.5rem; text-align: center; }
+        .drawer-actions { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+        .drawer-btn { background: #334155; color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; display: none; font-size: 0.9rem; }
+        .drawer-btn:hover { background: #475569; }
+
+        /* --- ПОДВАЛ САЙТА (FOOTER) --- */
+        .site-footer { margin-top: 4rem; padding: 2rem 1rem; text-align: center; color: #64748b; font-size: 0.75rem; line-height: 1.6; border-top: 1px dashed #334155; }
+        .site-footer a { color: #38bdf8; text-decoration: none; transition: color 0.2s; }
+        .site-footer a:hover { color: #7dd3fc; text-decoration: underline; }
+        .site-footer b { color: #94a3b8; }
+
     </style>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
 </head>
@@ -116,7 +137,29 @@
     <button class="main-btn" onclick="calculateRoute()">Построить маршрут</button>
     <div id="result"></div>
     <button id="saveImgBtn" class="copy-btn" style="display:none" onclick="saveAsImage()">Скачать маршрут как картинку</button>
+        <button class="drawer-toggle" onclick="toggleDrawer()">Нарисовать степь</button>
+    <div id="drawerContainer" class="drawer-container">
+        <p style="margin-top: 0; font-size: 0.9rem;">Нажимайте на ячейки, чтобы отметить переходы</p>
+        <div id="drawerGrid" class="drawer-grid"></div>
+        <div id="drawerResult" class="drawer-result">Отметьте переходы...</div>
+        <div class="drawer-actions">
+            <button class="drawer-btn" onclick="setDrawerTarget('start')">Сделать начальной</button>
+            <button class="drawer-btn" onclick="setDrawerTarget('end')">Сделать конечной</button>
+            <button class="drawer-btn" onclick="setDrawerTarget('waypoint')">Добавить в промежуточные</button>
+        </div>
+    </div>
+
 </div>
+    <div class="site-footer">
+    Код для сайта написан <b>Gemini</b> под чётким руководством игрока <a href="https://catwar.net/cat1033188" target="_blank"><b>Черничный Чизкейк</b></a> и с помощью её материалов из ленты.<br><br>
+    Отдельная благодарность:<br>
+    <a href="https://catwar.net/cat957405" target="_blank"><b>Валун8</b></a>, <a href="https://catwar.net/cat1659007" target="_blank"><b>Герой</b></a> и <a href="https://catwar.net/cat1274927" target="_blank"><b>Синамон</b></a> - за помощь в поиске ошибок;<br>
+    <a href="https://catwar.net/cat1659007" target="_blank"><b>Герой</b></a> - за идею создания графа степей;<br>
+    Создателям карты Звёздных Степей и Абстрактного Подвала за возможность дополнительно проверить правильность маршрутов;<br>
+    И, конечно, <b>тебе</b>, гость на этой страничке, за то, что используешь мой инструментик!<br><br>
+    P.S. Пожалуйста, напишите мне в <a href="https://t.me/LIUOVA" target="_blank">Телеграм (<b>@LIUOVA</b>)</a> или в <a href="https://catwar.net/ls?new=Черничный Чизкейк" target="_blank">ЛС</a>, если заметили баг/ошибку или имеете предложения для развития сайта!
+</div>
+
 
 <script id="data-graph" type="text/plain"><?xml version="1.0" encoding="UTF-8"?><graphml><graph id="Graph" uidGraph="100" uidEdge="11378">
     <node id="0" mainText="1" /><node id="1" mainText="2" /><node id="2" mainText="46" /><node id="3" mainText="43" /><node id="4" mainText="62" /><node id="5" mainText="5" /><node id="6" mainText="22" /><node id="7" mainText="3" /><node id="8" mainText="6" /><node id="9" mainText="34" /><node id="10" mainText="37" /><node id="11" mainText="38" /><node id="12" mainText="15" /><node id="13" mainText="55" /><node id="14" mainText="4" /><node id="15" mainText="36" /><node id="16" mainText="90" /><node id="17" mainText="52" /><node id="18" mainText="75" /><node id="19" mainText="23" /><node id="20" mainText="7" /><node id="21" mainText="99" /><node id="22" mainText="84" /><node id="23" mainText="65" /><node id="24" mainText="41" /><node id="25" mainText="49" /><node id="26" mainText="8" /><node id="27" mainText="83" /><node id="28" mainText="9" /><node id="29" mainText="25" /><node id="30" mainText="70" /><node id="31" mainText="26" /><node id="32" mainText="58" /><node id="33" mainText="28" /><node id="34" mainText="74" /><node id="35" mainText="59" /><node id="36" mainText="10" /><node id="37" mainText="66" /><node id="38" mainText="85" /><node id="39" mainText="11" /><node id="40" mainText="98" /><node id="41" mainText="54" /><node id="42" mainText="14" /><node id="43" mainText="12" /><node id="44" mainText="40" /><node id="45" mainText="27" /><node id="46" mainText="13" /><node id="47" mainText="35" /><node id="48" mainText="86" /><node id="49" mainText="30" /><node id="50" mainText="16" /><node id="51" mainText="72" /><node id="52" mainText="53" /><node id="53" mainText="76" /><node id="54" mainText="24" /><node id="55" mainText="17" /><node id="56" mainText="20" /><node id="57" mainText="18" /><node id="58" mainText="19" /><node id="59" mainText="29" /><node id="60" mainText="79" /><node id="61" mainText="68" /><node id="62" mainText="97" /><node id="63" mainText="21" /><node id="64" mainText="91" /><node id="65" mainText="63" /><node id="66" mainText="94" /><node id="67" mainText="78" /><node id="68" mainText="95" /><node id="69" mainText="56" /><node id="70" mainText="33" /><node id="71" mainText="93" /><node id="72" mainText="69" /><node id="73" mainText="32" /><node id="74" mainText="39" /><node id="75" mainText="50" /><node id="76" mainText="31" /><node id="77" mainText="67" /><node id="78" mainText="89" /><node id="79" mainText="77" /><node id="80" mainText="48" /><node id="81" mainText="47" /><node id="82" mainText="80" /><node id="83" mainText="45" /><node id="84" mainText="61" /><node id="85" mainText="42" /><node id="86" mainText="87" /><node id="87" mainText="57" /><node id="88" mainText="44" /><node id="89" mainText="82" /><node id="90" mainText="71" /><node id="91" mainText="73" /><node id="92" mainText="60" /><node id="93" mainText="51" /><node id="94" mainText="92" /><node id="95" mainText="100" /><node id="96" mainText="81" /><node id="97" mainText="88" /><node id="98" mainText="64" /><node id="99" mainText="96" />
@@ -1189,6 +1232,98 @@
             link.click();
         });
     }
+        // --- ЛОГИКА РИСОВАЛКИ ---
+    let drawnCells = new Set();
+    let currentMatchedSteppe = null;
+
+    function toggleDrawer() {
+        const container = document.getElementById('drawerContainer');
+        if (container.style.display === 'flex') {
+            container.style.display = 'none';
+        } else {
+            container.style.display = 'flex';
+            if (document.getElementById('drawerGrid').children.length === 0) {
+                initDrawerGrid();
+            }
+        }
+    }
+
+    function initDrawerGrid() {
+        const grid = document.getElementById('drawerGrid');
+        for (let i = 0; i < 60; i++) {
+            const cell = document.createElement('div');
+            cell.className = 'drawer-cell';
+            cell.onclick = () => {
+                cell.classList.toggle('active');
+                if (cell.classList.contains('active')) {
+                    drawnCells.add(i);
+                } else {
+                    drawnCells.delete(i);
+                }
+                checkDrawnSteppe();
+            };
+            grid.appendChild(cell);
+        }
+    }
+
+    function checkDrawnSteppe() {
+        const resultDiv = document.getElementById('drawerResult');
+        const btns = document.querySelectorAll('.drawer-btn');
+        currentMatchedSteppe = null;
+
+        if (drawnCells.size === 0) {
+            resultDiv.innerText = "Отметьте переходы...";
+            resultDiv.style.color = "#4ACA86";
+            btns.forEach(b => b.style.display = 'none');
+            return;
+        }
+
+        // Собираем индексы выделенных ячеек по порядку
+        const currentExits = Array.from(drawnCells).sort((a, b) => a - b);
+
+        // Ищем совпадение в нашей визуальной базе
+        for (const [steppe, cellsData] of Object.entries(visualData)) {
+            let patternExits = [];
+            cellsData.forEach((c, idx) => {
+                if (c.type === 'exit') patternExits.push(idx);
+            });
+
+            if (patternExits.length === currentExits.length && patternExits.every((val, i) => val === currentExits[i])) {
+                currentMatchedSteppe = steppe;
+                break;
+            }
+        }
+
+        if (currentMatchedSteppe) {
+            resultDiv.innerText = `Это степь номер ${currentMatchedSteppe}!`;
+            resultDiv.style.color = "#4ACA86";
+            btns.forEach(b => b.style.display = 'inline-block');
+        } else {
+            resultDiv.innerText = "Такой степи не существует";
+            resultDiv.style.color = "#f87171";
+            btns.forEach(b => b.style.display = 'none');
+        }
+    }
+
+    function setDrawerTarget(type) {
+        if (!currentMatchedSteppe) return;
+        
+        if (type === 'start') {
+            document.getElementById('startNode').value = currentMatchedSteppe;
+        } else if (type === 'end') {
+            document.getElementById('endNode').value = currentMatchedSteppe;
+        } else if (type === 'waypoint') {
+            addWaypoint(); // Эта функция у нас уже есть выше
+            const wpInputs = document.querySelectorAll(".waypoint-input");
+            if(wpInputs.length > 0) {
+                wpInputs[wpInputs.length - 1].value = currentMatchedSteppe;
+            }
+        }
+        
+        // Плавно прокручиваем страницу наверх к маршрутизатору
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
 /*
     function runDiagnostics() {
         const resultDiv = document.getElementById("result");
