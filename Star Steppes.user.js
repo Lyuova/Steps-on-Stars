@@ -181,20 +181,20 @@
     });
 
       // === ВИДЖЕТ МАРШРУТИЗАТОРА ===
-        // === ВИДЖЕТ МАРШРУТИЗАТОРА ===
     function createRouteWidget() {
-        // Ищем таблицу с инфо-блоками (родство, история, персонаж)
         const infoTable = document.getElementById('info_main');
-
-        // Защита от двойного создания
         if (!infoTable || document.getElementById('cw-route-widget')) return;
 
         const widgetContainer = document.createElement('div');
         widgetContainer.id = 'cw-route-widget';
-        // Растягиваем почти на всю ширину страницы и центрируем
-        widgetContainer.style.margin = '20px auto';
-        widgetContainer.style.width = '98%';
-        widgetContainer.style.textAlign = 'center';
+
+        // 1. Создаем панель управления (кнопки + галочка)
+        const controlPanel = document.createElement('div');
+        controlPanel.style.display = 'flex';
+        controlPanel.style.flexWrap = 'wrap';
+        controlPanel.style.justifyContent = 'center';
+        controlPanel.style.alignItems = 'center';
+        controlPanel.style.gap = '15px';
 
         const toggleBtn = document.createElement('button');
         toggleBtn.innerText = 'Строить маршрут (Звёздные степи)';
@@ -207,20 +207,57 @@
         toggleBtn.style.fontWeight = 'bold';
         toggleBtn.style.fontSize = '14px';
 
+        const moveBtn = document.createElement('button');
+        moveBtn.style.padding = '10px 15px';
+        moveBtn.style.cursor = 'pointer';
+        moveBtn.style.background = '#475569';
+        moveBtn.style.color = '#fff';
+        moveBtn.style.border = '1px solid #334155';
+        moveBtn.style.borderRadius = '5px';
+        moveBtn.style.fontWeight = 'bold';
+        moveBtn.style.fontSize = '14px';
+
+        // Галочка "Сворачивать"
+        const collapseLabel = document.createElement('label');
+        collapseLabel.style.fontSize = '13px';
+        collapseLabel.style.color = '#000'; // Черный текст, чтобы было видно на бежевом фоне
+        collapseLabel.style.cursor = 'pointer';
+        collapseLabel.style.display = 'flex';
+        collapseLabel.style.alignItems = 'center';
+        collapseLabel.style.gap = '5px';
+
+        const collapseCheckbox = document.createElement('input');
+        collapseCheckbox.type = 'checkbox';
+        collapseLabel.appendChild(collapseCheckbox);
+        collapseLabel.appendChild(document.createTextNode('Всегда сворачивать при обновлении'));
+
+        // 2. Создаем сам сайт-окно
         const iframe = document.createElement('iframe');
         iframe.id = 'cw-route-iframe';
         iframe.src = 'https://lyuova.github.io/Star-Steppes-route/';
         iframe.style.width = '100%';
-        // Сделал высоту чуть больше (700px), чтобы на широком экране помещалось еще больше данных
-        iframe.style.height = '700px';
         iframe.style.border = 'none';
         iframe.style.borderRadius = '8px';
         iframe.style.marginTop = '15px';
         iframe.style.boxShadow = '0 4px 6px rgba(0,0,0,0.3)';
 
-        // Вспоминаем, было ли окно открыто при прошлой загрузке
-        iframe.style.display = localStorage.getItem('cw-route-open') === 'true' ? 'block' : 'none';
+        // --- ЛОГИКА ГАЛОЧКИ ---
+        const autoCollapse = localStorage.getItem('cw-route-auto-collapse') === 'true';
+        collapseCheckbox.checked = autoCollapse;
 
+        collapseCheckbox.onchange = () => {
+            localStorage.setItem('cw-route-auto-collapse', collapseCheckbox.checked);
+        };
+
+        // Если стоит галочка авто-сворачивания, принудительно прячем окно при загрузке страницы
+        if (autoCollapse) {
+            iframe.style.display = 'none';
+            localStorage.setItem('cw-route-open', 'false');
+        } else {
+            iframe.style.display = localStorage.getItem('cw-route-open') === 'true' ? 'block' : 'none';
+        }
+
+        // Кнопка Открыть/Скрыть
         toggleBtn.onclick = () => {
             if (iframe.style.display === 'none') {
                 iframe.style.display = 'block';
@@ -230,6 +267,72 @@
                 localStorage.setItem('cw-route-open', 'false');
             }
         };
+
+        // 3. Создаем базовое "гнездо" для виджета в таблице (как делали раньше)
+        const tbody = infoTable.querySelector('tbody');
+        const tr = document.createElement('tr');
+        const td = document.createElement('td');
+        td.colSpan = 3;
+        td.className = 'infos';
+        td.style.padding = '10px';
+        tr.appendChild(td);
+        if (tbody) tbody.appendChild(tr);
+
+        // --- ЛОГИКА ПЕРЕМЕЩЕНИЯ (ВВЕРХ/ВНИЗ) ---
+        let isTop = localStorage.getItem('cw-route-position') === 'top';
+
+        function updatePosition() {
+            if (isTop) {
+                // Отрываем от таблицы и вешаем поверх экрана в левый верхний угол
+                document.body.appendChild(widgetContainer);
+                widgetContainer.style.position = 'fixed';
+                widgetContainer.style.top = '10px';
+                widgetContainer.style.left = '10px';
+                widgetContainer.style.width = '420px'; // Делаем окно узким, чтобы не закрывало всю игру
+                widgetContainer.style.zIndex = '9999'; // Поверх всего
+                widgetContainer.style.background = '#eedcc1'; // Бежевый цвет (как у таблиц игры)
+                widgetContainer.style.padding = '15px';
+                widgetContainer.style.border = '1px solid #777';
+                widgetContainer.style.borderRadius = '8px';
+                widgetContainer.style.boxShadow = '0 5px 20px rgba(0,0,0,0.6)'; // Мощная тень для объема
+                
+                moveBtn.innerText = '↘ Вернуть вниз';
+                iframe.style.height = '600px'; // Чуть короче для угла экрана
+            } else {
+                // Возвращаем в родную ячейку таблицы
+                td.appendChild(widgetContainer);
+                widgetContainer.style.position = 'static';
+                widgetContainer.style.width = '100%';
+                widgetContainer.style.zIndex = 'auto';
+                widgetContainer.style.background = 'transparent';
+                widgetContainer.style.padding = '0';
+                widgetContainer.style.border = 'none';
+                widgetContainer.style.boxShadow = 'none';
+                
+                moveBtn.innerText = '↖ В отдельное окно';
+                iframe.style.height = '700px';
+            }
+        }
+
+        // Переключатель позиции
+        moveBtn.onclick = () => {
+            isTop = !isTop;
+            localStorage.setItem('cw-route-position', isTop ? 'top' : 'bottom');
+            updatePosition();
+        };
+
+        // Собираем всё как конструктор
+        controlPanel.appendChild(toggleBtn);
+        controlPanel.appendChild(moveBtn);
+        controlPanel.appendChild(collapseLabel);
+        
+        widgetContainer.appendChild(controlPanel);
+        widgetContainer.appendChild(iframe);
+
+        // Применяем позицию сразу при запуске
+        updatePosition();
+    }
+
 
         widgetContainer.appendChild(toggleBtn);
         widgetContainer.appendChild(iframe);
