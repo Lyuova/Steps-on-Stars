@@ -234,8 +234,24 @@
         widgetContainer.appendChild(toggleBtn);
         widgetContainer.appendChild(iframe);
 
-        // Вставляем наш блок прямо внутрь ячейки главной таблицы, сразу ПОСЛЕ таблицы info_main!
-        infoTable.parentNode.insertBefore(widgetContainer, infoTable.nextSibling);
+                // Создаем новую строку прямо ВНУТРИ бежевой таблицы
+        const tbody = infoTable.querySelector('tbody');
+        if (tbody) {
+            const tr = document.createElement('tr');
+            const td = document.createElement('td');
+            
+            td.colSpan = 3; // Растягиваем ячейку на все 3 колонки (Родственники, История, Персонаж)
+            td.className = 'infos'; // Волшебный класс игры, который дает тот самый бежевый фон!
+            td.style.padding = '10px'; // Аккуратный отступ от краев
+            
+            // Немного уменьшим отступ самого виджета, так как у ячейки теперь есть свои отступы
+            widgetContainer.style.margin = '0 auto';
+            
+            td.appendChild(widgetContainer);
+            tr.appendChild(td);
+            tbody.appendChild(tr);
+        }
+
     }
 
     // ЗАПУСК
