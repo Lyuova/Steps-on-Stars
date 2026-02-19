@@ -125,15 +125,41 @@
 
         }
     }
-    // === ЛОГИКА ИСТОРИИ (Реверс и прокрутка) ===
         // === ЛОГИКА ИСТОРИИ (Реверс и прокрутка) ===
     function formatHistory() {
         const ist = document.getElementById('ist');
         if (!ist) return;
 
-        // 1. Оформляем блок (рамка, размер, прокрутка)
+        // Проверяем, стоит ли галочка "старой истории"
+        const useOldHistory = localStorage.getItem('cw-route-old-history') === 'true';
+
+        if (useOldHistory) {
+            // 1. Отменяем наши стили (возвращаем прозрачный фон и убираем рамки)
+            ist.style.display = '';
+            ist.style.maxHeight = '';
+            ist.style.overflowY = '';
+            ist.style.border = '';
+            ist.style.padding = '';
+            ist.style.borderRadius = '';
+            ist.style.backgroundColor = '';
+            ist.style.marginBottom = '';
+
+            // 2. Если история была перевернута нами, аккуратно возвращаем её обратно
+            const reversedDiv = ist.querySelector('#cw-history-reversed');
+            if (reversedDiv) {
+                let currentHTML = reversedDiv.innerHTML.trim();
+                let tempHTML = currentHTML.replace(/\.\s+/g, '.|||');
+                let parts = tempHTML.split('|||').filter(p => p.trim() !== '');
+                parts.reverse(); // Переворачиваем в исходный вид
+                ist.innerHTML = parts.join(' ');
+            }
+            return; // Прекращаем работу функции (оставляем старую историю в покое)
+        }
+
+        // --- ЛОГИКА НОВОЙ ИСТОРИИ ---
+        // 1. Оформляем блок
         ist.style.display = 'block';
-        ist.style.maxHeight = '250px';
+        ist.style.maxHeight = '250px'; 
         ist.style.overflowY = 'auto';
         ist.style.border = '1px solid #777';
         ist.style.padding = '5px';
@@ -141,29 +167,18 @@
         ist.style.backgroundColor = 'rgba(0, 0, 0, 0.05)';
         ist.style.marginBottom = '5px';
 
-        // 2. УМНАЯ БЛОКИРОВКА: проверяем, не перевернули ли мы этот текст уже
+        // 2. УМНАЯ БЛОКИРОВКА
         if (ist.querySelector('#cw-history-reversed')) return;
 
-        // Берем текущий текст от игры
         let currentHTML = ist.innerHTML.trim();
         if (!currentHTML) return;
-
-        // 3. Заменяем ". " на специальный маркер, чтобы не сломать ссылки на профили
+        
         let tempHTML = currentHTML.replace(/\.\s+/g, '.|||');
-
-        // Разбиваем на массив предложений
-        let parts = tempHTML.split('|||');
-
-        // Убираем возможные пустые кусочки
-        parts = parts.filter(p => p.trim() !== '');
-
-        // 4. ПЕРЕВОРАЧИВАЕМ!
+        let parts = tempHTML.split('|||').filter(p => p.trim() !== '');
+        
         parts.reverse();
-
-        // Склеиваем обратно с пробелами
         let finalHTML = parts.join(' ');
 
-        // 5. Оборачиваем в наш маркер-невидимку (display: contents не ломает верстку) и вставляем
         ist.innerHTML = `<div id="cw-history-reversed" style="display: contents;">${finalHTML}</div>`;
     }
 
@@ -180,7 +195,8 @@
         scanTimeout = setTimeout(scanAndMatch, 200);
     });
 
-      // === ВИДЖЕТ МАРШРУТИЗАТОРА ===
+      
+            // === ВИДЖЕТ МАРШРУТИЗАТОРА ===
     function createRouteWidget() {
         const infoTable = document.getElementById('info_main');
         if (!infoTable || document.getElementById('cw-route-widget')) return;
@@ -188,7 +204,7 @@
         const widgetContainer = document.createElement('div');
         widgetContainer.id = 'cw-route-widget';
 
-        // 1. Создаем панель управления (кнопки + галочка)
+        // 1. Создаем панель управления (кнопки + галочки)
         const controlPanel = document.createElement('div');
         controlPanel.style.display = 'flex';
         controlPanel.style.flexWrap = 'wrap';
@@ -220,7 +236,7 @@
         // Галочка "Сворачивать"
         const collapseLabel = document.createElement('label');
         collapseLabel.style.fontSize = '13px';
-        collapseLabel.style.color = '#000'; // Черный текст, чтобы было видно на бежевом фоне
+        collapseLabel.style.color = '#000'; 
         collapseLabel.style.cursor = 'pointer';
         collapseLabel.style.display = 'flex';
         collapseLabel.style.alignItems = 'center';
@@ -229,7 +245,21 @@
         const collapseCheckbox = document.createElement('input');
         collapseCheckbox.type = 'checkbox';
         collapseLabel.appendChild(collapseCheckbox);
-        collapseLabel.appendChild(document.createTextNode('Всегда сворачивать при обновлении'));
+        collapseLabel.appendChild(document.createTextNode('Сворачивать при обновлении'));
+
+        // НОВАЯ Галочка "Старая история"
+        const oldHistoryLabel = document.createElement('label');
+        oldHistoryLabel.style.fontSize = '13px';
+        oldHistoryLabel.style.color = '#000'; 
+        oldHistoryLabel.style.cursor = 'pointer';
+        oldHistoryLabel.style.display = 'flex';
+        oldHistoryLabel.style.alignItems = 'center';
+        oldHistoryLabel.style.gap = '5px';
+
+        const oldHistoryCheckbox = document.createElement('input');
+        oldHistoryCheckbox.type = 'checkbox';
+        oldHistoryLabel.appendChild(oldHistoryCheckbox);
+        oldHistoryLabel.appendChild(document.createTextNode('Вернуть старую историю'));
 
         // 2. Создаем сам сайт-окно
         const iframe = document.createElement('iframe');
@@ -241,15 +271,19 @@
         iframe.style.marginTop = '15px';
         iframe.style.boxShadow = '0 4px 6px rgba(0,0,0,0.3)';
 
-        // --- ЛОГИКА ГАЛОЧКИ ---
+        // --- ЛОГИКА ГАЛОЧЕК ---
         const autoCollapse = localStorage.getItem('cw-route-auto-collapse') === 'true';
         collapseCheckbox.checked = autoCollapse;
-
         collapseCheckbox.onchange = () => {
             localStorage.setItem('cw-route-auto-collapse', collapseCheckbox.checked);
         };
 
-        // Если стоит галочка авто-сворачивания, принудительно прячем окно при загрузке страницы
+        oldHistoryCheckbox.checked = localStorage.getItem('cw-route-old-history') === 'true';
+        oldHistoryCheckbox.onchange = () => {
+            localStorage.setItem('cw-route-old-history', oldHistoryCheckbox.checked);
+            formatHistory(); // Моментально перестраиваем историю при клике!
+        };
+
         if (autoCollapse) {
             iframe.style.display = 'none';
             localStorage.setItem('cw-route-open', 'false');
@@ -257,7 +291,6 @@
             iframe.style.display = localStorage.getItem('cw-route-open') === 'true' ? 'block' : 'none';
         }
 
-        // Кнопка Открыть/Скрыть
         toggleBtn.onclick = () => {
             if (iframe.style.display === 'none') {
                 iframe.style.display = 'block';
@@ -268,7 +301,7 @@
             }
         };
 
-        // 3. Создаем базовое "гнездо" для виджета в таблице (как делали раньше)
+        // 3. Создаем базовое "гнездо" для виджета в таблице
         const tbody = infoTable.querySelector('tbody');
         const tr = document.createElement('tr');
         const td = document.createElement('td');
@@ -283,23 +316,21 @@
 
         function updatePosition() {
             if (isTop) {
-                // Отрываем от таблицы и вешаем поверх экрана в левый верхний угол
                 document.body.appendChild(widgetContainer);
                 widgetContainer.style.position = 'fixed';
                 widgetContainer.style.top = '10px';
                 widgetContainer.style.left = '10px';
-                widgetContainer.style.width = '420px'; // Делаем окно узким, чтобы не закрывало всю игру
-                widgetContainer.style.zIndex = '9999'; // Поверх всего
-                widgetContainer.style.background = '#eedcc1'; // Бежевый цвет (как у таблиц игры)
+                widgetContainer.style.width = '420px'; 
+                widgetContainer.style.zIndex = '9999'; 
+                widgetContainer.style.background = '#eedcc1'; 
                 widgetContainer.style.padding = '15px';
                 widgetContainer.style.border = '1px solid #777';
                 widgetContainer.style.borderRadius = '8px';
-                widgetContainer.style.boxShadow = '0 5px 20px rgba(0,0,0,0.6)'; // Мощная тень для объема
+                widgetContainer.style.boxShadow = '0 5px 20px rgba(0,0,0,0.6)'; 
                 
-                moveBtn.innerText = '↘ Вернуть вниз';
-                iframe.style.height = '600px'; // Чуть короче для угла экрана
+                moveBtn.innerText = 'Вернуть вниз';
+                iframe.style.height = '600px'; 
             } else {
-                // Возвращаем в родную ячейку таблицы
                 td.appendChild(widgetContainer);
                 widgetContainer.style.position = 'static';
                 widgetContainer.style.width = '100%';
@@ -309,52 +340,27 @@
                 widgetContainer.style.border = 'none';
                 widgetContainer.style.boxShadow = 'none';
                 
-                moveBtn.innerText = '↖ В отдельное окно';
+                moveBtn.innerText = 'В отдельное окно';
                 iframe.style.height = '700px';
             }
         }
 
-        // Переключатель позиции
         moveBtn.onclick = () => {
             isTop = !isTop;
             localStorage.setItem('cw-route-position', isTop ? 'top' : 'bottom');
             updatePosition();
         };
 
-        // Собираем всё как конструктор
+        // Собираем панель управления
         controlPanel.appendChild(toggleBtn);
         controlPanel.appendChild(moveBtn);
         controlPanel.appendChild(collapseLabel);
+        controlPanel.appendChild(oldHistoryLabel);
         
         widgetContainer.appendChild(controlPanel);
         widgetContainer.appendChild(iframe);
 
-        // Применяем позицию сразу при запуске
         updatePosition();
-    }
-
-
-        widgetContainer.appendChild(toggleBtn);
-        widgetContainer.appendChild(iframe);
-
-                // Создаем новую строку прямо ВНУТРИ бежевой таблицы
-        const tbody = infoTable.querySelector('tbody');
-        if (tbody) {
-            const tr = document.createElement('tr');
-            const td = document.createElement('td');
-            
-            td.colSpan = 3; // Растягиваем ячейку на все 3 колонки (Родственники, История, Персонаж)
-            td.className = 'infos'; // Волшебный класс игры, который дает тот самый бежевый фон!
-            td.style.padding = '10px'; // Аккуратный отступ от краев
-            
-            // Немного уменьшим отступ самого виджета, так как у ячейки теперь есть свои отступы
-            widgetContainer.style.margin = '0 auto';
-            
-            td.appendChild(widgetContainer);
-            tr.appendChild(td);
-            tbody.appendChild(tr);
-        }
-
     }
 
     // ЗАПУСК
