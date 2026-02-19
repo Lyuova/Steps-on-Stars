@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Навигатор по степям</title>
     <link rel="icon" type="image/png" href="https://i.postimg.cc/Bv2h6BfN/Bez-nazvania617-20260219174018.png">
+   <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/uicons-regular-rounded/css/uicons-regular-rounded.css'>
     <style>
         /* --- СТИЛИ (Дизайн) --- */
         body {
@@ -166,6 +167,26 @@
         #result:empty {
             display: none;
         }
+
+                /* --- ВКЛАДКИ (Рисовать / Показать) --- */
+        .tabs-row { display: flex; gap: 10px; margin-top: 1rem; }
+        .tabs-row .drawer-toggle { margin-top: 0; flex: 1; }
+        .inline-show-btn { background: #334155; color: #38bdf8; border: 1px solid #475569; border-radius: 4px; padding: 0 10px; cursor: pointer; font-size: 0.8rem; transition: background 0.2s; white-space: nowrap; }
+        .inline-show-btn:hover { background: #475569; color: #fff; }
+        
+        /* Внешний вид для полей ввода со встроенной кнопкой */
+        .input-group .input-wrapper { display: flex; gap: 8px; }
+
+        /* --- ПЛАВАЮЩИЕ СТРЕЛКИ --- */
+        .floating-arrows { position: fixed; bottom: 30px; right: 30px; display: flex; flex-direction: column; gap: 10px; z-index: 1000; }
+        .scroll-btn { width: 40px; height: 40px; border-radius: 50%; background: #1e293b; border: 1px solid #475569; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.3s; opacity: 0.7; }
+        .scroll-btn:hover { opacity: 1; background: #334155; transform: scale(1.1); }
+        .scroll-btn i { 
+            font-size: 1.5rem; 
+            /* Тот самый фильтр: инверсия, 0 насыщенности и яркость на максимум, чтобы стал белым */
+            filter: invert(1) grayscale(1) brightness(2); 
+        }
+
     </style>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
 </head>
@@ -174,14 +195,23 @@
 <div class="card">
     <h1>Навигатор по Степям</h1>
     <p>Введите номера степей от 1 до 100.</p>
-        <div class="input-group">
+   <div class="input-group">
         <label>Начальная степь:</label>
-        <input type="text" id="startNode" placeholder="1">
-    </div>
+        <div class="input-wrapper">
+            <input type="text" id="startNode" placeholder="1">
+            <button class="inline-show-btn" onclick="openViewerWithId('startNode')">Показать</button>
+        </div>
+   </div>
     <div id="waypointsContainer" style="margin: 10px 0; padding-left: 10px; border-left: 2px dashed #475569;"></div>
     <button class="copy-btn" style="margin-bottom: 15px; width: auto;" onclick="addWaypoint()">+ Пройти через...</button>
     <div class="action-buttons"><button class="icon-btn" onclick="swapInputs()" title="Поменять местами">⇅</button></div>
-    <div class="input-group"><label>Конечная степь:</label><input type="text" id="endNode" placeholder="100"></div>
+     <div class="input-group">
+        <label>Конечная степь:</label>
+        <div class="input-wrapper">
+            <input type="text" id="endNode" placeholder="100">
+            <button class="inline-show-btn" onclick="openViewerWithId('endNode')">Показать</button>
+        </div>
+     </div>
     <button class="main-btn" onclick="calculateRoute()">Построить маршрут</button>
         <div class="two-cols-wrapper">
         <label style="cursor: pointer; display: inline-flex; align-items: center; justify-content: center;">
@@ -191,7 +221,11 @@
     </div>
     <div id="result"></div>
     <button id="saveImgBtn" class="copy-btn" style="display:none" onclick="saveAsImage()">Скачать маршрут как картинку</button>
-        <button class="drawer-toggle" onclick="toggleDrawer()">Нарисовать степь</button>
+            <div class="tabs-row">
+        <button class="drawer-toggle" id="btnDraw" onclick="openTab('draw')">Нарисовать степь</button>
+        <button class="drawer-toggle" id="btnView" onclick="openTab('view')">Показать степь</button>
+    </div>
+
     <div id="drawerContainer" class="drawer-container">
         <p style="margin-top: 0; font-size: 0.9rem;">Нажимайте на ячейки, чтобы отметить переходы</p>
         <div id="drawerGrid" class="drawer-grid"></div>
@@ -201,6 +235,16 @@
             <button class="drawer-btn" onclick="setDrawerTarget('end')">Сделать конечной</button>
             <button class="drawer-btn" onclick="setDrawerTarget('waypoint')">Добавить в промежуточные</button>
         </div>
+    </div>
+
+    <div id="viewerContainer" class="drawer-container">
+        <p style="margin-top: 0; font-size: 0.9rem;">Введите номер степи, которую хотите увидеть:</p>
+        <div style="display: flex; gap: 10px; margin-bottom: 1rem; width: 100%;">
+            <input type="text" id="viewerInput" placeholder="Номер..." style="flex: 1;">
+            <button class="drawer-btn" style="display:block; padding: 0 1.5rem;" onclick="renderViewer()">Показать</button>
+        </div>
+        <div id="viewerResult" class="drawer-result"></div>
+        <div id="viewerGrid" class="drawer-grid" style="display:none; pointer-events: none;"></div>
     </div>
 
 </div>
@@ -1086,7 +1130,7 @@
     // --- НОВЫЙ БЛОК ЛОГИКИ (Вставь вместо старой calculateRoute) ---
 
     // Функция добавления поля для точки
-    function addWaypoint() {
+       function addWaypoint() {
         const container = document.getElementById("waypointsContainer");
         const div = document.createElement("div");
         div.style.marginBottom = "5px";
@@ -1094,10 +1138,12 @@
         div.style.gap = "5px";
         div.innerHTML = `
             <input type="text" class="waypoint-input" placeholder="Номер степи...">
-            <button onclick="this.parentElement.remove()" style="background:#ef4444; border:none; color:white; border-radius:4px; cursor:pointer;">×</button>
+            <button onclick="openViewerWithElement(this)" class="inline-show-btn">Показать</button>
+            <button onclick="this.parentElement.remove()" style="background:#ef4444; border:none; color:white; border-radius:4px; cursor:pointer; padding: 0 10px;">X</button>
         `;
         container.appendChild(div);
     }
+
 
     // Главная функция расчета
     function calculateRoute() {
@@ -1290,18 +1336,6 @@
     let drawnCells = new Set();
     let currentMatchedSteppe = null;
 
-    function toggleDrawer() {
-        const container = document.getElementById('drawerContainer');
-        if (container.style.display === 'flex') {
-            container.style.display = 'none';
-        } else {
-            container.style.display = 'flex';
-            if (document.getElementById('drawerGrid').children.length === 0) {
-                initDrawerGrid();
-            }
-        }
-    }
-
     function initDrawerGrid() {
         const grid = document.getElementById('drawerGrid');
         for (let i = 0; i < 60; i++) {
@@ -1400,6 +1434,109 @@
         }
     });
 
+        // --- ЛОГИКА ВКЛАДОК И ПРОСМОТРА ---
+    function openTab(tab) {
+        const drawCont = document.getElementById('drawerContainer');
+        const viewCont = document.getElementById('viewerContainer');
+        const btnDraw = document.getElementById('btnDraw');
+        const btnView = document.getElementById('btnView');
+
+        if (tab === 'draw') {
+            if (drawCont.style.display === 'flex') {
+                drawCont.style.display = 'none';
+                btnDraw.style.background = '#1e293b';
+            } else {
+                drawCont.style.display = 'flex';
+                viewCont.style.display = 'none';
+                btnDraw.style.background = '#334155';
+                btnView.style.background = '#1e293b';
+                if (document.getElementById('drawerGrid').children.length === 0) initDrawerGrid();
+            }
+        } else {
+            if (viewCont.style.display === 'flex') {
+                viewCont.style.display = 'none';
+                btnView.style.background = '#1e293b';
+            } else {
+                viewCont.style.display = 'flex';
+                drawCont.style.display = 'none';
+                btnView.style.background = '#334155';
+                btnDraw.style.background = '#1e293b';
+            }
+        }
+    }
+
+    // Вызов показа степи из поля (по ID)
+    function openViewerWithId(inputId) {
+        const val = document.getElementById(inputId).value.trim();
+        openTab('view');
+        document.getElementById('viewerContainer').style.display = 'flex'; // Принудительно открываем
+        if (val) {
+            document.getElementById('viewerInput').value = val;
+            renderViewer(val);
+        }
+    }
+
+    // Вызов показа степи из промежуточной точки (по элементу кнопки)
+    function openViewerWithElement(btnElement) {
+        const val = btnElement.previousElementSibling.value.trim();
+        openTab('view');
+        document.getElementById('viewerContainer').style.display = 'flex';
+        if (val) {
+            document.getElementById('viewerInput').value = val;
+            renderViewer(val);
+        }
+    }
+
+    // Отрисовка степи в режиме просмотра
+    function renderViewer(forceNum = null) {
+        const num = forceNum || document.getElementById('viewerInput').value.trim();
+        const grid = document.getElementById('viewerGrid');
+        const result = document.getElementById('viewerResult');
+        
+        grid.innerHTML = '';
+        grid.style.display = 'none';
+
+        if (!num || !visualData[num]) {
+            result.innerText = "Такой степи не существует";
+            result.style.color = "#f87171";
+            return;
+        }
+
+        result.innerText = `Степь ${num}`;
+        result.style.color = "#4ACA86";
+        grid.style.display = 'grid';
+
+        // Рисуем сетку на основе данных
+        visualData[num].forEach(cellData => {
+            const cell = document.createElement('div');
+            cell.className = 'drawer-cell'; // Используем те же стили ячеек
+            if (cellData.type === 'exit') {
+                cell.classList.add('active'); // Делаем черной
+            }
+            grid.appendChild(cell);
+        });
+    }
+
+    // --- ЛОГИКА СТРЕЛОЧЕК ПРОКРУТКИ ---
+    window.addEventListener('scroll', () => {
+        const upBtn = document.getElementById('scrollUpBtn');
+        const downBtn = document.getElementById('scrollDownBtn');
+        
+        // Показывать стрелку вверх, если прокрутили чуть вниз
+        if (window.scrollY > 200) {
+            upBtn.style.display = 'flex';
+        } else {
+            upBtn.style.display = 'none';
+        }
+
+        // Прятать стрелку вниз, если докрутили до самого конца
+        if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 50) {
+            downBtn.style.display = 'none';
+        } else {
+            downBtn.style.display = 'flex';
+        }
+    });
+
 /*
     function runDiagnostics() {
         const resultDiv = document.getElementById("result");
@@ -1458,6 +1595,10 @@
     parseGraph();
     parseVisuals();
 </script>
+<div class="floating-arrows">
+    <button id="scrollUpBtn" class="scroll-btn" onclick="window.scrollTo({top: 0, behavior: 'smooth'})" style="display:none;"><i class="fi fi-rr-angle-small-up"></i></button>
+    <button id="scrollDownBtn" class="scroll-btn" onclick="window.scrollTo({top: document.body.scrollHeight, behavior: 'smooth'})"><i class="fi fi-rr-angle-small-down"></i></button>
+</div>
 
 </body>
 </html>
