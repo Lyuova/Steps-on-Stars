@@ -235,8 +235,9 @@
             <button class="drawer-btn" onclick="setDrawerTarget('end')">Сделать конечной</button>
             <button class="drawer-btn" onclick="setDrawerTarget('waypoint')">Добавить в промежуточные</button>
         </div>
+            <button onclick="resetDrawer()" style="background: #ef4444; color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; margin-top: 15px; font-size: 0.9rem; width: 100%; transition: background 0.2s;" onmouseover="this.style.background='#dc2626'" onmouseout="this.style.background='#ef4444'">Сбросить сетку</button>
     </div>
-
+        
     <div id="viewerContainer" class="drawer-container">
         <p style="margin-top: 0; font-size: 0.9rem;">Введите номер степи, которую хотите увидеть:</p>
         <div style="display: flex; gap: 10px; margin-bottom: 1rem; width: 100%;">
@@ -1224,9 +1225,24 @@
             return;
         }
 
-        // Визуализация
+                // Визуализация
         renderPathVisuals(finalPath, resultDiv);
         if(saveBtn) saveBtn.style.display = "block";
+
+        // --- НОВАЯ КНОПКА "СВЕРНУТЬ МАРШРУТ" ---
+        const closeBtn = document.createElement("button");
+        closeBtn.className = "drawer-btn";
+        closeBtn.innerText = "Свернуть маршрут";
+        closeBtn.style.display = "block";
+        closeBtn.style.gridColumn = "1 / -1"; // Растягиваем на всю ширину (если включены 2 колонки)
+        closeBtn.style.margin = "20px auto 0 auto"; // Отступы и центрирование
+        closeBtn.onclick = () => {
+            resultDiv.innerHTML = ""; // Очищаем блок
+            if (saveBtn) saveBtn.style.display = "none"; // Прячем кнопку скачивания
+            window.scrollTo({ top: 0, behavior: 'smooth' }); // Возвращаем пользователя наверх
+        };
+        resultDiv.appendChild(closeBtn);
+        // --------------------------------------
     }
 
     // Простой поиск пути (BFS)
@@ -1353,6 +1369,14 @@
             grid.appendChild(cell);
         }
     }
+        // Функция сброса нарисованной степи
+    function resetDrawer() {
+        drawnCells.clear(); // Очищаем память от нажатых клеток
+        const cells = document.querySelectorAll('#drawerGrid .drawer-cell');
+        cells.forEach(cell => cell.classList.remove('active')); // Убираем черный цвет со всех клеток
+        checkDrawnSteppe(); // Обновляем текст (вернется надпись "Отметьте переходы...")
+    }
+
 
     function checkDrawnSteppe() {
         const resultDiv = document.getElementById('drawerResult');
@@ -1465,27 +1489,34 @@
         }
     }
 
-    // Вызов показа степи из поля (по ID)
+        // Вызов показа степи из поля (по ID)
     function openViewerWithId(inputId) {
         const val = document.getElementById(inputId).value.trim();
         openTab('view');
-        document.getElementById('viewerContainer').style.display = 'flex'; // Принудительно открываем
+        const viewCont = document.getElementById('viewerContainer');
+        viewCont.style.display = 'flex'; // Принудительно открываем
         if (val) {
             document.getElementById('viewerInput').value = val;
             renderViewer(val);
         }
+        // Плавная прокрутка экрана к открывшемуся блоку
+        viewCont.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
 
     // Вызов показа степи из промежуточной точки (по элементу кнопки)
     function openViewerWithElement(btnElement) {
         const val = btnElement.previousElementSibling.value.trim();
         openTab('view');
-        document.getElementById('viewerContainer').style.display = 'flex';
+        const viewCont = document.getElementById('viewerContainer');
+        viewCont.style.display = 'flex';
         if (val) {
             document.getElementById('viewerInput').value = val;
             renderViewer(val);
         }
+        // Плавная прокрутка экрана к открывшемуся блоку
+        viewCont.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
+
 
     // Отрисовка степи в режиме просмотра
     function renderViewer(forceNum = null) {
