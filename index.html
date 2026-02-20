@@ -191,6 +191,11 @@
             font-size: 1.5rem !important; /* Меняй цифру 1.5, чтобы сделать больше или меньше */
             margin-bottom: 5px; /* Заодно можно немного уменьшить отступ снизу */
         }
+        /* --- ПОДСВЕТКА КЛЮЧЕВЫХ СТЕПЕЙ --- */
+        .highlight-target {
+            border: 2px solid #4ade80 !important; /* Зеленая обводка */
+            box-shadow: 0 0 10px rgba(74, 222, 128, 0.2); /* Легкое зеленое свечение */
+        }
 
     </style>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
@@ -235,6 +240,7 @@
         <p style="margin-top: 0; font-size: 0.9rem;">Нажимайте на ячейки, чтобы отметить переходы</p>
         <div id="drawerGrid" class="drawer-grid"></div>
         <div id="drawerResult" class="drawer-result">Отметьте переходы...</div>
+                <div id="autocompletePrompt" style="display:none; margin-top:10px; font-size:0.9rem; color:#cbd5e1; text-align:center;"></div>
         <div class="drawer-actions">
             <button class="drawer-btn" onclick="setDrawerTarget('start')">Сделать начальной</button>
             <button class="drawer-btn" onclick="setDrawerTarget('end')">Сделать конечной</button>
@@ -1233,6 +1239,24 @@
 
                 // Визуализация
         renderPathVisuals(finalPath, resultDiv);
+                // --- ПОДСВЕТКА ПРОМЕЖУТОЧНЫХ И КОНЕЧНОЙ СТЕПИ ---
+        const targetEndVal = document.getElementById('endNode').value.trim();
+        const waypointsVals = Array.from(document.querySelectorAll('.waypoint-input')).map(inp => inp.value.trim()).filter(v => v !== '');
+        const targetsToHighlight = [targetEndVal, ...waypointsVals];
+
+        const renderedSteps = resultDiv.querySelectorAll('.step-container');
+        renderedSteps.forEach((container, index) => {
+            // Пропускаем самую первую карточку (Старт), чтобы не подсвечивать её
+            if (index === 0) return; 
+            
+            targetsToHighlight.forEach(target => {
+                // Ищем точное совпадение номера степи в тексте карточки
+                // Регулярное выражение \b гарантирует, что "Степь 5" не совпадет со "Степь 50"
+                if (container.innerText.match(new RegExp(`Степь\\s+${target}\\b`, 'i'))) {
+                    container.classList.add('highlight-target');
+                }
+            });
+        });
         if(saveBtn) saveBtn.style.display = "block";
 
         // --- НОВАЯ КНОПКА "СВЕРНУТЬ МАРШРУТ" ---
@@ -1398,7 +1422,62 @@
             resultDiv.style.color = "#4ACA86";
             btns.forEach(b => b.style.display = 'none');
             return;
+                    // --- АВТОДОПОЛНЕНИЕ СТЕПИ ---
+        const promptDiv = document.getElementById('autocompletePrompt');
+        if (promptDiv) {
+            const drawnArray = Array.from(drawnCells); // Массив нарисованных клеток
+            
+            if (drawnArray.length < 2) {
+                promptDiv.style.display = 'none'; // Скрываем, если точек меньше двух
+            } else {
+                let possibleMatches = [];
+                
+                // Перебираем все степи в базе
+                for (let num in visualData) {
+                    const steppeData = visualData[num];
+                    const exitIndices = [];
+                    
+                    // Собираем все черные клетки (выходы) этой степи
+                    steppeData.forEach((cell, idx) => {
+                        if (cell.type === 'exit') exitIndices.push(idx);
+                    });
+                    
+                    // Проверяем, входят ли ВСЕ нарисованные клетки в выходы этой степи
+                    const allDrawnAreExits = drawnArray.every(cellIdx => exitIndices.includes(cellIdx));
+                    if (allDrawnAreExits) {
+                        possibleMatches.push({ num: num, exits: exitIndices });
+                    }
+                }
+                
+                // Если нашлась ровно 1 подходящая степь и она еще не дорисована до конца
+                if (possibleMatches.length === 1 && possibleMatches[0].exits.length > drawnArray.length) {
+                    const matchNum = possibleMatches[0].num;
+                    promptDiv.style.display = 'block';
+                    promptDiv.innerHTML = `Возможно, это степь ${matchNum}? <button class="inline-show-btn" style="margin-left: 10px; padding: 4px 10px;" onclick="autocompleteSteppe('${matchNum}')">Дорисовать за меня</button>`;
+                } else {
+                    promptDiv.style.display = 'none';
+                }
+            }
         }
+        }
+            // Функция автодополнения сетки
+    function autocompleteSteppe(num) {
+        resetDrawer(); // Очищаем поле от наших незаконченных кликов
+        
+        const steppeData = visualData[num];
+        const cells = document.querySelectorAll('#drawerGrid .drawer-cell');
+        
+        // Закрашиваем все выходы для нужной степи
+        steppeData.forEach((cellData, index) => {
+            if (cellData.type === 'exit') {
+                drawnCells.add(index);
+                cells[index].classList.add('active');
+            }
+        });
+        
+        checkDrawnSteppe(); // Обновляем результат (текст загорится зеленым, а подсказка сама исчезнет)
+    }
+
 
         // Собираем индексы выделенных ячеек по порядку
         const currentExits = Array.from(drawnCells).sort((a, b) => a - b);
