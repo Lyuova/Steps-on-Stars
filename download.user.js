@@ -264,7 +264,7 @@
         // 2. Создаем сам сайт-окно
         const iframe = document.createElement('iframe');
         iframe.id = 'cw-route-iframe';
-        iframe.src = 'https://lyuova.github.io/Star-Steppes-route/';
+        iframe.src = 'https://lyuova.github.io/Steps-on-Stars/';
         iframe.style.width = '100%';
         iframe.style.border = 'none';
         iframe.style.borderRadius = '8px';
