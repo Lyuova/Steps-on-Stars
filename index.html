@@ -1423,6 +1423,34 @@
             btns.forEach(b => b.style.display = 'none');
             return;
         }
+
+
+        // Собираем индексы выделенных ячеек по порядку
+        const currentExits = Array.from(drawnCells).sort((a, b) => a - b);
+
+        // Ищем совпадение в нашей визуальной базе
+        for (const [steppe, cellsData] of Object.entries(visualData)) {
+            let patternExits = [];
+            cellsData.forEach((c, idx) => {
+                if (c.type === 'exit') patternExits.push(idx);
+            });
+
+            if (patternExits.length === currentExits.length && patternExits.every((val, i) => val === currentExits[i])) {
+                currentMatchedSteppe = steppe;
+                break;
+            }
+        }
+
+        if (currentMatchedSteppe) {
+            resultDiv.innerText = `Это степь номер ${currentMatchedSteppe}!`;
+            resultDiv.style.color = "#4ACA86";
+            btns.forEach(b => b.style.display = 'inline-block');
+        } else {
+            resultDiv.innerText = "Такой степи не существует";
+            resultDiv.style.color = "#f87171";
+            btns.forEach(b => b.style.display = 'none');
+        }
+    
                     // --- АВТОДОПОЛНЕНИЕ СТЕПИ ---
         const promptDiv = document.getElementById('autocompletePrompt');
         if (promptDiv) {
@@ -1478,34 +1506,6 @@
         });
         
         checkDrawnSteppe(); // Обновляем результат (текст загорится зеленым, а подсказка сама исчезнет)
-    }
-
-
-        // Собираем индексы выделенных ячеек по порядку
-        const currentExits = Array.from(drawnCells).sort((a, b) => a - b);
-
-        // Ищем совпадение в нашей визуальной базе
-        for (const [steppe, cellsData] of Object.entries(visualData)) {
-            let patternExits = [];
-            cellsData.forEach((c, idx) => {
-                if (c.type === 'exit') patternExits.push(idx);
-            });
-
-            if (patternExits.length === currentExits.length && patternExits.every((val, i) => val === currentExits[i])) {
-                currentMatchedSteppe = steppe;
-                break;
-            }
-        }
-
-        if (currentMatchedSteppe) {
-            resultDiv.innerText = `Это степь номер ${currentMatchedSteppe}!`;
-            resultDiv.style.color = "#4ACA86";
-            btns.forEach(b => b.style.display = 'inline-block');
-        } else {
-            resultDiv.innerText = "Такой степи не существует";
-            resultDiv.style.color = "#f87171";
-            btns.forEach(b => b.style.display = 'none');
-        }
     }
 
     function setDrawerTarget(type) {
