@@ -1412,52 +1412,55 @@
     }
 
 
-    function checkDrawnSteppe() {
+        function checkDrawnSteppe() {
         const resultDiv = document.getElementById('drawerResult');
         const btns = document.querySelectorAll('.drawer-btn');
+        const promptDiv = document.getElementById('autocompletePrompt');
         currentMatchedSteppe = null;
 
+        // Если ничего не нарисовано
         if (drawnCells.size === 0) {
             resultDiv.innerText = "Отметьте переходы...";
             resultDiv.style.color = "#4ACA86";
             btns.forEach(b => b.style.display = 'none');
+            if (promptDiv) promptDiv.style.display = 'none';
             return;
         }
 
+        const drawnArray = Array.from(drawnCells);
+        let matchFound = false;
 
-        // Собираем индексы выделенных ячеек по порядку
-        const currentExits = Array.from(drawnCells).sort((a, b) => a - b);
-
-        // Ищем совпадение в нашей визуальной базе
-        for (const [steppe, cellsData] of Object.entries(visualData)) {
-            let patternExits = [];
-            cellsData.forEach((c, idx) => {
-                if (c.type === 'exit') patternExits.push(idx);
+        // --- ВОТ ЭТОТ КУСОК ТЫ ПОТЕРЯЛ (Он отвечает за готовые степи) ---
+        for (let num in visualData) {
+            const steppeData = visualData[num];
+            const exitIndices = [];
+            
+            steppeData.forEach((cell, idx) => {
+                if (cell.type === 'exit') exitIndices.push(idx);
             });
 
-            if (patternExits.length === currentExits.length && patternExits.every((val, i) => val === currentExits[i])) {
-                currentMatchedSteppe = steppe;
+            if (drawnArray.length === exitIndices.length && drawnArray.every(val => exitIndices.includes(val))) {
+                currentMatchedSteppe = num;
+                resultDiv.innerText = `Это степь ${num}`;
+                resultDiv.style.color = "#4ACA86";
+                btns.forEach(b => b.style.display = 'block'); // Показываем кнопки "Сделать начальной" и тд
+                matchFound = true;
                 break;
             }
         }
 
-        if (currentMatchedSteppe) {
-            resultDiv.innerText = `Это степь номер ${currentMatchedSteppe}!`;
-            resultDiv.style.color = "#4ACA86";
-            btns.forEach(b => b.style.display = 'inline-block');
-        } else {
-            resultDiv.innerText = "Такой степи не существует";
+        if (!matchFound) {
+            resultDiv.innerText = "Степь не распознана";
             resultDiv.style.color = "#f87171";
             btns.forEach(b => b.style.display = 'none');
         }
-    
-                    // --- АВТОДОПОЛНЕНИЕ СТЕПИ ---
-        const promptDiv = document.getElementById('autocompletePrompt');
+        // -------------------------------------------------------------
+
+        // --- АВТОДОПОЛНЕНИЕ СТЕПИ (Твоя новая часть) ---
         if (promptDiv) {
-            const drawnArray = Array.from(drawnCells); // Массив нарисованных клеток
-            
-            if (drawnArray.length < 2) {
-                promptDiv.style.display = 'none'; // Скрываем, если точек меньше двух
+            // Если степь уже угадана полностью или точек меньше двух - прячем подсказку
+            if (matchFound || drawnArray.length < 2) {
+                promptDiv.style.display = 'none';
             } else {
                 let possibleMatches = [];
                 
@@ -1466,19 +1469,17 @@
                     const steppeData = visualData[num];
                     const exitIndices = [];
                     
-                    // Собираем все черные клетки (выходы) этой степи
                     steppeData.forEach((cell, idx) => {
                         if (cell.type === 'exit') exitIndices.push(idx);
                     });
                     
-                    // Проверяем, входят ли ВСЕ нарисованные клетки в выходы этой степи
                     const allDrawnAreExits = drawnArray.every(cellIdx => exitIndices.includes(cellIdx));
                     if (allDrawnAreExits) {
                         possibleMatches.push({ num: num, exits: exitIndices });
                     }
                 }
                 
-                // Если нашлась ровно 1 подходящая степь и она еще не дорисована до конца
+                // Если нашлась ровно 1 подходящая степь
                 if (possibleMatches.length === 1 && possibleMatches[0].exits.length > drawnArray.length) {
                     const matchNum = possibleMatches[0].num;
                     promptDiv.style.display = 'block';
@@ -1489,15 +1490,14 @@
             }
         }
     }
-        
-            // Функция автодополнения сетки
+
+    // Функция автодополнения сетки (она у тебя правильная, оставляем как есть)
     function autocompleteSteppe(num) {
-        resetDrawer(); // Очищаем поле от наших незаконченных кликов
+        resetDrawer(); 
         
         const steppeData = visualData[num];
         const cells = document.querySelectorAll('#drawerGrid .drawer-cell');
         
-        // Закрашиваем все выходы для нужной степи
         steppeData.forEach((cellData, index) => {
             if (cellData.type === 'exit') {
                 drawnCells.add(index);
@@ -1505,8 +1505,10 @@
             }
         });
         
-        checkDrawnSteppe(); // Обновляем результат (текст загорится зеленым, а подсказка сама исчезнет)
+        checkDrawnSteppe(); 
     }
+
+    
 
     function setDrawerTarget(type) {
         if (!currentMatchedSteppe) return;
