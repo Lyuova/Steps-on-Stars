@@ -1249,6 +1249,10 @@
         };
         resultDiv.appendChild(closeBtn);
         // --------------------------------------
+                // Сохраняем все введенные данные в память
+        saveRouteMemory();
+    } // <-- Это самая последняя скобка функции calculateRoute
+
     }
 
     // Простой поиск пути (BFS)
@@ -1650,20 +1654,48 @@
     });
 
     // 2. Сохраняем конечную степь при обновлении страницы
-    window.addEventListener('DOMContentLoaded', () => {
-        const endInput = document.getElementById('endNode');
-        
-        // Восстанавливаем из памяти
-        const savedEnd = localStorage.getItem('cwSavedEndSteppe');
-        if (savedEnd) {
-            endInput.value = savedEnd;
-        }
+        // 2. ПОЛНОЕ СОХРАНЕНИЕ И ВОССТАНОВЛЕНИЕ МАРШРУТА
+    function saveRouteMemory() {
+        const start = document.getElementById('startNode').value;
+        const end = document.getElementById('endNode').value;
+        const wps = Array.from(document.querySelectorAll('.waypoint-input')).map(inp => inp.value);
+        localStorage.setItem('cwFullRoute', JSON.stringify({start, end, wps}));
+    }
 
-        // Сохраняем любое изменение в поле "Финиш"
-        endInput.addEventListener('input', () => {
-            localStorage.setItem('cwSavedEndSteppe', endInput.value);
-        });
+    window.addEventListener('DOMContentLoaded', () => {
+        const savedData = localStorage.getItem('cwFullRoute');
+        if (savedData) {
+            try {
+                const data = JSON.parse(savedData);
+                
+                // Восстанавливаем старт и финиш
+                if (data.start) document.getElementById('startNode').value = data.start;
+                if (data.end) document.getElementById('endNode').value = data.end;
+                
+                // Восстанавливаем промежуточные точки
+                if (data.wps && data.wps.length > 0) {
+                    const container = document.getElementById("waypointsContainer");
+                    container.innerHTML = ""; // Очищаем на всякий случай
+                    data.wps.forEach(val => {
+                        if (val.trim() !== '') {
+                            addWaypoint();
+                            const inputs = document.querySelectorAll('.waypoint-input');
+                            inputs[inputs.length - 1].value = val;
+                        }
+                    });
+                }
+                
+                // Если есть и старт, и финиш, даем команду построить маршрут автоматически!
+                if (data.start && data.end) {
+                    // Задержка 300мс нужна, чтобы база степей успела подгрузиться до расчета
+                    setTimeout(calculateRoute, 300); 
+                }
+            } catch(e) {
+                console.error("Ошибка чтения памяти маршрута", e);
+            }
+        }
     });
+
 
     // Запуск
     parseGraph();
