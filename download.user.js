@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name         CatWar Steppe Scanner
+// @name         SoS: Навигатор Звёздных Степей
 // @namespace    Violent Monkey Scripts
 // @version      1.0
 // @description  Автоматически определяет номер Звездной степи по сетке переходов
